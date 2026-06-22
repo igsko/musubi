@@ -1,0 +1,419 @@
+/* Global Resets */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border-width: 0;
+}
+
+/* Light Mode (Default) */
+:root {
+  --bg-app: #faf8f5;
+  --bg-card: #ffffff;
+  --text-main: #2a2825;
+  --text-muted: #706b64;
+  --border-main: #e0e0e0;
+  --accent: #b82c3c;
+}
+
+/* Dark Mode (Overridden automatically) */
+:root.dark {
+  --bg-app: #1a1a18;       /* Very dark warm charcoal */
+  --bg-card: #242422;      /* Dark card fill */
+  --text-main: #f0edea;    /* Soft off-white */
+  --text-muted: #9e9a93;   /* Muted warm gray */
+  --border-main: #333330;  /* Dark dividers */
+  --accent: #d94152;       /* Brighter crimson for dark contrast */
+}
+
+
+/* Global Body Styling */
+body {
+    margin: 0;
+    font-family: sans-serif;
+    overflow: hidden;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+}
+
+/* Global Button Reset */
+button {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* Layout Structure */
+main.container {
+    height: 100vh; /* Full viewport height when running on web */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+main.container.tauri-desktop {
+    height: calc(100vh - 32px); /* Adjust for custom titlebar height in Tauri */
+}
+
+/* =================================*********
+   SEARCH SECTION
+   ================================********* */
+.search-section {
+    flex-shrink: 0; /* Prevents search bar from shrinking vertically */
+    -webkit-user-select: none;
+    user-select: none;
+    padding: 8px 8px 0px 8px;
+    margin-bottom: 8px;
+}
+
+.search-box-container {
+    position: relative;
+    border: 1px solid #e2e8f0;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    overflow: hidden;
+
+    /* smooth transition for the border and glow */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box-container:hover {
+    border-color: #c1c9d3; /* Change border color on hover */
+    box-shadow: 0 0 0 3px rgba(181, 184, 189, 0.15); /* Subtle glow effect */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Smooth transition for hover effect */
+}
+
+.search-box-container:focus-within {
+    border-color: #4a5568;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.search-box {
+    padding: 14px 48px 14px 16px;
+    width: 100%;
+    border-radius: 24px;
+    outline: none; 
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease-out; /* Ensure both hover and mouseleave transition */
+}
+
+.search-box:hover {
+    background-color: var(--bg-card); /* Slightly lighter background on hover */
+}
+
+.search-icon-svg {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.clear-icon-svg {
+
+}
+
+/* =================================*********
+   SUGGESTIONS LIST SECTION
+   ================================********* */
+.dropdown {
+    display: flex;
+    flex-direction: column;
+
+    max-height: 250px;
+    overflow-y: auto; /* Adds a scrollbar only when items exceed max-height */
+
+    position: absolute; /* Floats the list so it doesn't push down the rest of UI */
+    width: 100%;
+    z-index: 10;        /* Ensures it sits on top of cards or other text beneath it */
+    box-sizing: border-box;
+
+    /* visual */
+    background-color: inherit; /* Matches the background of the search box */
+    border: 1px solid #e0e0e0;
+    border-top: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 4px 4px;
+}
+
+.dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+    background-color: #cccccc;
+    border-radius: 3px;
+}
+
+.dropdown::-webkit-scrollbar-thumb:hover {
+    background-color: #a0a0a0;
+}
+
+/* Style for individual control buttons */
+.dropdown li {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: none;
+    border-bottom: #4a4a4a 1px solid;
+    background: transparent;
+    color: #5f5f5f;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.dropdown li:hover {
+    background-color: #e5e5e5;
+}
+
+/* Hover effect for the close button is traditionally red */
+.dropdown li.close-btn:hover {
+    background-color: #e81123;
+    color: #ffffff;
+}
+
+.dropdown li button {
+    font-size: 1.5rem;
+    text-align: left;
+    width: 100%;
+}
+
+.suggestion-btn {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px 6px 8px; /* Symmetrical padding for 2-line layout */
+
+    /* STACK ELEMENTS VERTICALLY */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px; /* Small vertical gap between Japanese word and translation */
+}
+
+.japanese-word {
+    font-size: 1.5rem;
+    color: #111;
+    display: inline-flex;
+    align-items: baseline;
+    line-height: 1;
+}
+
+.kanji-with-reading {
+    ruby-position: over;
+}
+
+.furigana {
+    font-size: 0.55em;
+    color: #888;
+    letter-spacing: 0.02em;
+    padding-bottom: 2px;
+    user-select: none;
+}
+
+.kana-only {
+    /* Inherits the 1.5rem font-size from parent button */
+}
+
+.translation {
+    font-size: 0.9rem;
+    color: #4a4a4a;
+    margin-top: 2px;
+    padding-left: 4px;
+}
+
+.view-section {
+    flex-grow: 1;
+    position: relative; /* Acts as the anchor for absolute elements */
+    overflow: hidden;
+}
+
+/* Desktop Detail Card Styling */
+.card {
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    background-color: var(--bg-card);
+}
+
+.back-btn {
+    display: none; /* Hidden by default on desktop viewports */
+}
+
+/* =================================*********
+   CUSTOM TITLEBAR STYLES 
+   ================================********* */
+.custom-titlebar {
+    height: 32px;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-main);
+    display: flex;
+    flex-direction: row; /* Fixed from 'direction: row' */
+    justify-content: space-between;
+    align-items: center;
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.app-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding-left: 12px;
+}
+
+.window-controls {
+    display: flex;
+    height: 100%;
+}
+
+.control-btn {
+    height: 100%;
+    width: 32px;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+.control-btn:hover {
+    background-color: var(--bg-card);
+}
+
+.close-btn:hover {
+    background-color: var(--accent) !important;
+    color: white !important;
+}
+
+/* Responsive (Mobile) Layout */
+@media (max-width: 600px) {
+    /* On mobile, make the card an absolute overlay */
+    .card {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 20; /* Displays on top of suggestions list */
+        background-color: var(--bg-card);
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+    }
+
+    .card-content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 16px;
+    }
+
+    /* Show the Back button on mobile to return to suggestions */
+    .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px 16px;
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-main);
+        color: var(--accent);
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        background-color: var(--bg-card);
+    }
+}
+
+/* =================================*********
+   DESKTOP LAYOUT OVERRIDES
+   ========================================= */
+@media (min-width: 601px) {
+    /* 
+      Convert the main container into a 2-column, 2-row grid.
+         - Column 1 is strictly 360px wide (Search & suggestions).
+         - Column 2 fills the rest of the screen (Details card).
+         - Row 1 matches the search box height automatically.
+         - Row 2 fills the remaining vertical space.
+    */
+    main.container {
+        display: grid !important;
+        grid-template-columns: 360px 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    /* Position the search box on the top-left cell */
+    .search-section {
+        grid-column: 1;
+        grid-row: 1;
+        padding: 8px 8px 0px 8px;
+        margin-bottom: 8px;
+    }
+
+    /* 
+        CRUCIAL: "display: contents" removes .view-section from the box model 
+        rendering, making its children (.dropdown and .card) direct children 
+        of main.container grid
+    */
+    .view-section {
+        display: contents !important;
+    }
+
+    /* Position the suggestions list strictly on the bottom-left cell */
+    .dropdown {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        
+        /* Convert from floating absolute to a solid static grid cell */
+        position: static !important;
+        width: auto !important;
+        max-height: none !important;
+        height: 100% !important;
+        overflow-y: auto;
+        
+        /* Spacing & borders to match the searchbox margins */
+        margin: 0px 8px 8px 8px;
+        border: 1px solid var(--border-main) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important;
+        background-color: var(--bg-card) !important;
+    }
+
+    /* position the card on the right spanning both rows.*/
+    .card {
+        grid-column: 2 !important;
+        grid-row: 1 / 3 !important; /* Spans from row 1 to row 3 */
+        height: 100%;
+        overflow-y: auto;
+        padding: 16px;
+        background-color: var(--bg-card);
+        border-left: 1px solid var(--border-main); /* column separator */
+    }
+
+    .back-btn {
+        display: none !important;
+    }
+}
