@@ -1,5 +1,6 @@
   // @ts-nocheck
 import { fetchSuggestions, fetchEntryDetails } from '$lib/services/platform.js';
+import { getValue, saveValue } from '$lib/services/storage.js';
 
   class DictionaryState {
     // Reactive state variables
@@ -7,12 +8,35 @@ import { fetchSuggestions, fetchEntryDetails } from '$lib/services/platform.js';
     suggestions = $state([]);
     selectedEntry = $state(null);
 
+    // Reactive state variables for user data
+    bookmarks = $state([]);
+    history = $state([]);
+
     // Private helper variables
     #debounceTimer = null;
     #latestQuery = '';
     #hasMore = true; // Set to false when SQLite returns less than 20 rows
     #loadingMore = false; // Prevent multiple simultaneous loadMore calls
 
+    // Load saved user data from disk when the app initializes
+    async init() {
+        this.bookmarks = await getValue('bookmarks', []);
+        this.history = await getValue('history', []);
+        console.log("Loaded bookmarks and history from storage:", $state.snapshot(this.bookmarks), $state.snapshot(this.history));
+    }
+
+    // Toggles a bookmarked entry ID and saves the bookmark array to persistent storage
+    async toggleBookmark(id) {
+        // When toggling a bookmark, we check if the ID is already in the bookmarks array.
+        if (this.bookmarks.includes(id)) {
+            this.bookmarks = this.bookmarks.filter(bookmarkId => bookmarkId !== id);
+        } else {
+            this.bookmarks.push(id);
+        }
+        // Save the updated bookmarks to persistent storage
+        await saveValue('bookmarks', $state.snapshot(this.bookmarks));
+    }
+ 
     async handleInput() {
         console.log("-> handleInput triggered! Current query:", this.query);
 
@@ -87,6 +111,12 @@ import { fetchSuggestions, fetchEntryDetails } from '$lib/services/platform.js';
         try {
             const jsonStr = await fetchEntryDetails(id);
             this.selectedEntry = JSON.parse(jsonStr);
+
+            if(!this.history.includes(id)) {
+                this.history.unshift(id); // Add to top of list
+                this.history = this.history.slice(0, 50); // Limit history to last 50 items
+                await saveValue('history', $state.snapshot(this.history));
+            }
         } catch (err) {
             console.error("Error fetching entry details:", err);
         }

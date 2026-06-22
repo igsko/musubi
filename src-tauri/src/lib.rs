@@ -2,10 +2,10 @@
 // - `tauri` provides the application runtime, command handling, and path resolution APIs.
 // - `rusqlite` is a lightweight SQLite binding used to open and query the packaged database.
 // - `serde` is used to (de)serialize Rust structs to/from JSON when communicating with the frontend.
-use tauri::{AppHandle, Manager, State};
-use rusqlite::{Connection};
-use serde::{Serialize, Deserialize};
-use std::sync::Mutex; // Mutex is used to wrap the SQLite connection for safe concurrent access across threads.
+use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
+use std::sync::Mutex;
+use tauri::{AppHandle, Manager, State}; // Mutex is used to wrap the SQLite connection for safe concurrent access across threads.
 
 // A simple wrapper struct that holds a `rusqlite::Connection` inside a `Mutex`.
 struct DbState {
@@ -26,7 +26,7 @@ pub struct Suggestion {
     kana: String,
     romaji: String,
     translation: String,
-    frequency_rank: i32
+    frequency_rank: i32,
 }
 
 // Open connection helper to load database from the resources directory
@@ -38,8 +38,12 @@ pub struct Suggestion {
 /// converted into a `String` for simple propagation to command callers.
 fn open_db(app: &AppHandle) -> Result<Connection, String> {
     // Resolve the path to the resource directory in a cross-platform way.
-    let resource_path = app.path()
-        .resolve("resources/dictionary.db", tauri::path::BaseDirectory::Resource)
+    let resource_path = app
+        .path()
+        .resolve(
+            "resources/dictionary.db",
+            tauri::path::BaseDirectory::Resource,
+        )
         // Convert any path resolution error into a string so the public command
         // APIs can return it directly to the frontend.
         .map_err(|e| e.to_string())?;
@@ -61,11 +65,10 @@ fn open_db(app: &AppHandle) -> Result<Connection, String> {
 /// for display/logging.
 #[tauri::command]
 async fn get_suggestions(
-    state: State<'_, DbState>, 
+    state: State<'_, DbState>,
     query: String,
-    offset: i32
+    offset: i32,
 ) -> Result<Vec<Suggestion>, String> {
-
     // Lock the connection mutex to query safely across threads
     let conn = state.conn.lock().unwrap();
     // Prepare the query string: remove surrounding whitespace and normalize case
@@ -98,16 +101,18 @@ async fn get_suggestions(
     ).map_err(|e| e.to_string())?;
 
     // Map the columns in order: 0 (id), 1 (kanji), 2 (kana), 3 (romaji), 4 (translation)
-    let rows = database_query.query_map((clean_query, offset), |row| {
-        Ok(Suggestion {
-            id: row.get(0)?,
-            kanji: row.get(1)?,
-            kana: row.get(2)?,
-            romaji: row.get(3)?,
-            translation: row.get(4)?,
-            frequency_rank: row.get(5)?,
+    let rows = database_query
+        .query_map((clean_query, offset), |row| {
+            Ok(Suggestion {
+                id: row.get(0)?,
+                kanji: row.get(1)?,
+                kana: row.get(2)?,
+                romaji: row.get(3)?,
+                translation: row.get(4)?,
+                frequency_rank: row.get(5)?,
+            })
         })
-    }).map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?;
 
     // We loop through the mapped rows and push them into our final list vector.
     let mut list = Vec::new();
@@ -131,21 +136,23 @@ async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<String,
     // Prepare a parameterized query to fetch the full JSON payload for the selected entry.
     // We use 'WHERE id = ?1 OR id = CAST(?1 AS TEXT)' to robustly handle cases
     // where the database stores IDs either as integers or text strings.
-    let mut database_query = conn.prepare(
-        "SELECT full_json FROM entries 
-         WHERE id = ?1 OR id = CAST(?1 AS TEXT)"
-    ).map_err(|e| e.to_string())?;
+    let mut database_query = conn
+        .prepare(
+            "SELECT full_json FROM entries 
+         WHERE id = ?1 OR id = CAST(?1 AS TEXT)",
+        )
+        .map_err(|e| e.to_string())?;
 
     // `query_row` expects exactly one result; it will return an error if no row
     // is found or more than one row is returned (the latter should not happen
     // when querying by primary key). We map any rusqlite error into a string
     // for the command API.
-    let json_str: String = database_query.query_row([id], |row| row.get(0))
+    let json_str: String = database_query
+        .query_row([id], |row| row.get(0))
         .map_err(|e| e.to_string())?;
 
     Ok(json_str)
 }
-
 
 // Entry point for native platforms (and mobile when compiled with the `mobile` feature).
 // This function builds the Tauri application, registers plugins and command handlers,
@@ -154,20 +161,25 @@ async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<String,
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         // Initialize optional plugins here. `tauri_plugin_opener` allows the app
         // to open URLs and system resources in a platform-appropriate way.
-        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_store::Builder::new().build())
         // We open the SQLite database connection during setup and store it in the app state.
         .setup(|app| {
-            let resource_path = app.path()
-            .resolve("resources/dictionary.db", tauri::path::BaseDirectory::Resource)
-            .expect("Failed to resolve db path");
+            let resource_path = app
+                .path()
+                .resolve(
+                    "resources/dictionary.db",
+                    tauri::path::BaseDirectory::Resource,
+                )
+                .expect("Failed to resolve db path");
 
             let conn = Connection::open(resource_path).expect("Failed to open database file");
 
             // Manage the database connection state so it can be accessed in command handlers.
             app.manage(DbState {
-                conn: Mutex::new(conn)
+                conn: Mutex::new(conn),
             });
 
             Ok(())
