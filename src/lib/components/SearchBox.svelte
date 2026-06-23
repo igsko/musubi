@@ -1,11 +1,11 @@
 <script>
   // @ts-nocheck
-  import { dict } from '$lib/state.svelte.js';
+  import { search } from '$lib/state.svelte.js';
   let inputEl;
 
   function clearSearch() {
-    dict.query = '';
-    dict.handleInput();
+    search.query = '';
+    search.handleInput();
     inputEl?.focus();
   }
 </script>
@@ -15,12 +15,12 @@
     class="search-box" 
     type="text" 
     bind:this={inputEl}
-    bind:value={dict.query} 
-    oninput={() => dict.handleInput()} 
+    bind:value={search.query} 
+    oninput={() => search.handleInput()} 
     placeholder="Szukaj..." 
   />
 
-  {#if dict.query}
+  {#if search.query}
     <button 
       onclick={clearSearch}
       class="clear-btn" 

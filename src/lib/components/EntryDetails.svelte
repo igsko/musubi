@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import { dict } from '$lib/state.svelte.js';
+  import {details, user, goBack, goToWord} from '$lib/state.svelte.js'; // import state and actions
   import { segmentFurigana } from '$lib/utils/furigana.js';
 
   const POS_KEYWORDS = [
@@ -78,18 +78,18 @@
   }
 
   // reactively compute the primary headword whenever selectedEntry changes
-  let firstHW = $derived(dict.selectedEntry ? dict.selectedEntry.headwords[0] : null);
+  let firstHW = $derived(details.selectedEntry ? details.selectedEntry.headwords[0] : null);
   // reactively split the primary word into kanji and kana
   let primary = $derived(firstHW ? splitJapanese(firstHW.japanese) : { kanji: null, kana: "" });
 </script>
 
-{#if dict.selectedEntry}
+{#if details.selectedEntry}
   <div class="card">
     <!-- 
       Mobile-only Back Button.
       Resolves to the global action to return to search suggestions.
     -->
-    <button class="back-btn" onclick={() => dict.goBack()}>
+    <button class="back-btn" onclick={() => goBack()}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
@@ -118,11 +118,11 @@
       </header>
 
       <!-- ALTERNATIVE SPELLINGS (if multiple exist) -->
-      {#if dict.selectedEntry.headwords.length > 1}
+      {#if details.selectedEntry.headwords.length > 1}
         <section class="section">
           <h3 class="section-title">Inne pisownie / odczyty</h3>
           <div class="spelling-tags">
-            {#each dict.selectedEntry.headwords.slice(1) as hw}
+            {#each details.selectedEntry.headwords.slice(1) as hw}
               {const p = splitJapanese(hw.japanese)}
               <span class="spelling-tag">
                 <span class="spelling-core">
@@ -146,7 +146,7 @@
       <section class="section">
         <h3 class="section-title">Znaczenia</h3>
         <ol class="meanings-list">
-          {#each dict.selectedEntry.meanings as meaning}
+          {#each details.selectedEntry.meanings as meaning}
             <li class="meaning-item">
               <!-- Metadata and Interactive Badges -->
               {#if meaning.metadata && meaning.metadata.length > 0}
@@ -159,7 +159,7 @@
                       <button 
                         type="button" 
                         class="meta-badge see-also-btn" 
-                        onclick={() => dict.goToWord(seeAlso.keyword)}
+                        onclick={() => goToWord(seeAlso.keyword)}
                       >
                         <span class="see-also-label">ZOBACZ RÓWNIEŻ</span>
                         <span class="see-also-target">{seeAlso.display}</span>

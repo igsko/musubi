@@ -1,6 +1,6 @@
 <script>
   //@ts-nocheck
-  import { dict } from '$lib/state.svelte.js';
+  import { search, details, user } from '$lib/state.svelte.js';
   import { segmentFurigana } from '$lib/utils/furigana.js';
 
   // Detects when the user is reaching the bottom of the list
@@ -10,16 +10,22 @@
     // Trigger when we are within 30px of the bottom boundary
     if (scrollHeight - scrollTop - clientHeight < 30) {
       // User is near the bottom of the list, load more suggestions
-      dict.loadMore();
+      search.loadMore();
     }
   }
 </script>
 
-{#if dict.suggestions.length > 0}
+{#if search.suggestions.length > 0}
   <ul class="dropdown" onscroll={handleScroll}>
-    {#each dict.suggestions as sug (sug.id)}
+    {#each search.suggestions as sug (sug.id)}
       <li>
-        <button type="button" onclick={() => dict.selectWord(sug.id)} class="suggestion-btn">
+        <button type="button" onclick={
+          async () => {
+            await details.selectWord(sug.id); // load details in details state
+            await user.addToHistory(sug.id); // add to history in user state
+            search.clear(); // close dropdown in search state
+          }} 
+          class="suggestion-btn">
           <div class="japanese-word">
             {#each segmentFurigana(sug.kanji, sug.kana) as segment}
               <ruby class="kanji-with-reading">

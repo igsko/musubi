@@ -5,7 +5,6 @@
   import SearchBox from '$lib/components/SearchBox.svelte';
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
   import EntryDetails from '$lib/components/EntryDetails.svelte';
-  import { dict } from '$lib/state.svelte.js';
 </script>
 
 <Titlebar />

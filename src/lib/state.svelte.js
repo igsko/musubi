@@ -1,152 +1,70 @@
   // @ts-nocheck
-import { fetchSuggestions, fetchEntryDetails } from '$lib/services/platform.js';
-import { getValue, saveValue } from '$lib/services/storage.js';
+import {SearchState} from '$lib/state/search.svelte.js';
+import {DetailsState} from '$lib/state/details.svelte.js';
+import {UserState} from '$lib/state/user.svelte.js';
 
-  class DictionaryState {
-    // Reactive state variables
-    query = $state('');
-    suggestions = $state([]);
-    selectedEntry = $state(null);
+// This file serves as a centralized state management module for the application, 
+// aggregating the search, details, and user states into a single exportable object.
+// It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
+export const search = new SearchState();
+pub_search();
 
-    // Reactive state variables for user data
-    bookmarks = $state([]);
-    history = $state([]);
+function pub_search() {
+  // Organizer wrapper
+}
 
-    // Private helper variables
-    #debounceTimer = null;
-    #latestQuery = '';
-    #hasMore = true; // Set to false when SQLite returns less than 20 rows
-    #loadingMore = false; // Prevent multiple simultaneous loadMore calls
+export const details = new DetailsState();
+pub_details();
 
-    // Load saved user data from disk when the app initializes
-    async init() {
-        this.bookmarks = await getValue('bookmarks', []);
-        this.history = await getValue('history', []);
-        console.log("Loaded bookmarks and history from storage:", $state.snapshot(this.bookmarks), $state.snapshot(this.history));
-    }
+function pub_details() {
+  // Organizer wrapper
+}
 
-    // Toggles a bookmarked entry ID and saves the bookmark array to persistent storage
-    async toggleBookmark(id) {
-        // When toggling a bookmark, we check if the ID is already in the bookmarks array.
-        if (this.bookmarks.includes(id)) {
-            this.bookmarks = this.bookmarks.filter(bookmarkId => bookmarkId !== id);
+export const user = new UserState();
+pub_user();
+
+function pub_user() {
+  // Organizer wrapper
+}
+
+// Global "Search and jump" redirect action
+pub_goToWord();
+
+function pub_goToWord() {
+  // Organizer wrapper
+}
+
+export async function goToWord(keyword) {
+    // Update the search box UI so the user knows where they navigated to
+    // search.query = keyword;
+    details.close();
+
+    try {
+        const {fetchSuggestions} = await import('$lib/services/platform.js');
+        // Fetch the results for this exact word
+        const results = await fetchSuggestions(keyword, 0);
+
+        if (results.length > 0) {
+            const topId = results[0].id;
+            await details.selectWord(topId);
+            await user.addToHistory(topId);
+            search.clear(); // Close the suggestions list
         } else {
-            this.bookmarks.push(id);
+            search.suggestions = results;
         }
-        // Save the updated bookmarks to persistent storage
-        await saveValue('bookmarks', $state.snapshot(this.bookmarks));
+    } catch (err) {
+        console.error("Error in goToWord navigation:", err);
     }
- 
-    async handleInput() {
-        console.log("-> handleInput triggered! Current query:", this.query);
+}
 
-        // Instantly clear any pending search timers from previous keystroke
-        clearTimeout(this.#debounceTimer);
+// Global "Go back" action
+pub_goBack();
 
-        // If the query is too short, clear suggestions immediately and exit
-        if (this.query.trim().length < 2) {
-            this.suggestions = [];
-            this.#hasMore = true;
-            return;
-        }
+function pub_goBack() {
+  // Organizer wrapper
+}
 
-        const activeQuery = this.query;
-        this.#latestQuery = activeQuery;
-
-        // Set a 150ms debounce delay
-        // If the user types another letter within 150ms, this block is canceled
-        this.#debounceTimer = setTimeout(async () => {
-            try {
-                this.#hasMore = true; // Reset hasMore for new queries
-                
-                // query rust which queries SQLite indexes
-                // fetches the first 20 results for the current query
-                const results = await fetchSuggestions(activeQuery, 0);
-
-                // Race condition protection
-                if (this.#latestQuery === activeQuery) {
-                    this.suggestions = results;
-                    console.log("Suggestions from SQLite:", $state.snapshot(this.suggestions));
-
-                    // If fewer than 20 results are returned, we know there are no more results to fetch
-                    if(results.length < 20) {
-                        this.#hasMore = false; // No more results available
-                    }
-                }
-            } catch (err) {
-                console.error("Error fetching suggestions:", err);
-            }
-        }, 150);
-    }
-
-    async loadMore() {
-        if(this.#loadingMore || !this.#hasMore) return;
-
-        this.#loadingMore = true;
-        const activeQuery = this.query;
-        const currentOffset = this.suggestions.length; // use current length as offset for next batch
-
-        try {
-            const results = await fetchSuggestions(activeQuery, currentOffset);
-            // Ensure the user hasn't typed something else while we were fetching more results
-            if (this.query === activeQuery) {
-                this.suggestions.push(...results);
-
-                // If fewer than 20 results are returned, we know there are no more results to fetch
-                if(results.length < 20) {
-                    this.#hasMore = false;
-                }
-            }
-        } catch (err) {
-            console.error("Error loading more suggestions:", err);
-        } finally {
-            this.#loadingMore = false;
-        }
-    }
-
-    async selectWord(id) {
-        // Cancel any pending search timers immediately after selecting a word
-        clearTimeout(this.#debounceTimer);
-        // this.suggestions = [];
-        try {
-            const jsonStr = await fetchEntryDetails(id);
-            this.selectedEntry = JSON.parse(jsonStr);
-
-            if(!this.history.includes(id)) {
-                this.history.unshift(id); // Add to top of list
-                this.history = this.history.slice(0, 50); // Limit history to last 50 items
-                await saveValue('history', $state.snapshot(this.history));
-            }
-        } catch (err) {
-            console.error("Error fetching entry details:", err);
-        }
-    }
-
-    goBack() {
-        this.selectedEntry = null;
-        this.handleInput(); // re-run the search query to re-populate SuggestionsList
-    }
-
-    async goToWord(keyword) {
-        // Update the search box UI so the user knows where they navigated to
-        // this.query = keyword;
-
-        try {
-            // Fetch the results for this exact word
-            const results = await fetchSuggestions(keyword, 0);
-
-            if (results.length > 0) {
-                // Immediately select and open the top match
-                await this.selectWord(results[0].id);
-            } else {
-                // Fallback: If not found, just show the search list
-                this.suggestions = results;
-                this.selectedEntry = null;
-            }
-        } catch (err) {
-            console.error("Error navigaring to word:", err);
-        }
-    }
-  }
-
-  export const dict = new DictionaryState();
+export function goBack() {
+  details.close();
+  search.handleInput(); // Re-fetches the active search suggestions list
+}
