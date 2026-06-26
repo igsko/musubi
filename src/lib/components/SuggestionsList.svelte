@@ -26,7 +26,7 @@
             search.clear(); // close dropdown in search state
           }} 
           class="suggestion-btn">
-          <div class="japanese-word">
+          <div class="japanese-word" lang="ja">
             {#each segmentFurigana(sug.kanji, sug.kana) as segment}
               <ruby class="kanji-with-reading">
                 {segment.text}

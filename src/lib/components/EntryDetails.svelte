@@ -100,7 +100,7 @@
 
     <div class="card-content">
       <!-- MAIN HEADER (kanji, furigana & romaji) -->
-      <header class="card-header">
+      <header class="card-header" lang="ja">
         {#if firstHW}
           <div class="main-word">
             {#each segmentFurigana(primary.kanji, primary.kana) as segment, i}
