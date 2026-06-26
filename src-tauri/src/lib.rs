@@ -12,6 +12,16 @@ struct DbState {
     conn: Mutex<Connection>,
 }
 
+// A lightweight struct returned to the frontend as the full entry payload.
+// - `pitch_accent` is an optional string representing the pitch accent of the entry.
+// - `full_json` is a string containing the complete JSON representation of the entry, 
+//   which can be parsed and rendered by the frontend.
+#[derive(Serialize, Deserialize)]
+pub struct EntryPayload {
+    pitch_accent: Option<String>,
+    full_json: String,
+}
+
 // A lightweight struct returned to the frontend as a suggestion item.
 //
 // - `id` is the internal integer primary key for the entry in the `entries` table.
@@ -27,6 +37,7 @@ pub struct Suggestion {
     romaji: String,
     translation: String,
     frequency_rank: i32,
+    pitch_accent: Option<String>,
 }
 
 // Open connection helper to load database from the resources directory
@@ -80,7 +91,7 @@ async fn get_suggestions(
     // and returns a small, distinct set of matching `entries` with a hard limit
     // to avoid returning excessive data for the UI.
     let mut database_query = conn.prepare(
-        "SELECT e.id, e.kanji, e.kana, e.romaji, e.translation, e.frequency_rank 
+        "SELECT e.id, e.kanji, e.kana, e.romaji, e.translation, e.frequency_rank, e.pitch_accent 
         FROM search_index s 
         JOIN entries e ON s.entry_id = e.id 
         WHERE s.key LIKE ?1 || '%' 
@@ -110,6 +121,7 @@ async fn get_suggestions(
                 romaji: row.get(3)?,
                 translation: row.get(4)?,
                 frequency_rank: row.get(5)?,
+                pitch_accent: row.get(6)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -130,7 +142,7 @@ async fn get_suggestions(
 /// data for an entry. This command returns that JSON blob as a `String` so the
 /// frontend can parse and render it as needed.
 #[tauri::command]
-async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<String, String> {
+async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<EntryPayload, String> {
     let conn = state.conn.lock().unwrap();
 
     // Prepare a parameterized query to fetch the full JSON payload for the selected entry.
@@ -138,7 +150,7 @@ async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<String,
     // where the database stores IDs either as integers or text strings.
     let mut database_query = conn
         .prepare(
-            "SELECT full_json FROM entries 
+            "SELECT pitch_accent, full_json FROM entries 
          WHERE id = ?1 OR id = CAST(?1 AS TEXT)",
         )
         .map_err(|e| e.to_string())?;
@@ -147,11 +159,16 @@ async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<String,
     // is found or more than one row is returned (the latter should not happen
     // when querying by primary key). We map any rusqlite error into a string
     // for the command API.
-    let json_str: String = database_query
-        .query_row([id], |row| row.get(0))
+    let payload = database_query
+        .query_row([id], |row| {
+            Ok(EntryPayload {
+                pitch_accent: row.get(0)?,
+                full_json: row.get(1)?,
+            })
+        })
         .map_err(|e| e.to_string())?;
 
-    Ok(json_str)
+    Ok(payload)
 }
 
 // Entry point for native platforms (and mobile when compiled with the `mobile` feature).

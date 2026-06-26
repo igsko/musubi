@@ -16,7 +16,13 @@
     type="text" 
     bind:this={inputEl}
     bind:value={search.query} 
-    oninput={() => search.handleInput()} 
+    oninput={() => search.handleInput(false)} 
+    onkeydown={(e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        search.handleInput(true);
+      }
+    }}
     placeholder="Szukaj..." 
   />
 

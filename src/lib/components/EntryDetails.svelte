@@ -2,6 +2,7 @@
   // @ts-nocheck
   import {details, user, goBack, goToWord} from '$lib/state.svelte.js'; // import state and actions
   import { segmentFurigana } from '$lib/utils/furigana.js';
+  import {parsePitchAccent} from '$lib/utils/pitch.js';
 
   const POS_KEYWORDS = [
     'rzeczownik', 'czasownik', 'przymiotnik', 'przysłówek', 'zaimek', 
@@ -113,7 +114,24 @@
               </ruby>
             {/each}
           </div>
-          <div class="main-romaji">{firstHW.romaji}</div>
+
+          <div class="header-sub-line">
+            <span class="main-romaji">{firstHW.romaji}</span>
+            <!-- PITCH ACCENT GRAPH (if available in the db) -->
+            {#if details.selectedEntry.pitch_accent}
+              <div class="pitch-graph-inline">
+                {#each parsePitchAccent(details.selectedEntry.pitch_accent) as mora}
+                  <!-- 
+                    Applies the 'high' and 'downstep' CSS classes dynamically 
+                    based on the parsed mora structure
+                  -->
+                  <span class="mora {mora.isHigh ? 'high' : ''} {mora.isDownstep ? 'downstep' : ''}">
+                    <span class="mora-text">{mora.text}</span>
+                  </span>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
       </header>
 
@@ -208,13 +226,21 @@
   */
 
   .card-header {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     border-bottom: 1px solid var(--border-main);
-    padding-bottom: 18px;
+    padding-bottom: 12px;
+  }
+
+  .header-sub-line {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+    flex-wrap: wrap;
   }
 
   .main-word {
-    font-size: 3rem;
+    font-size: 2.8rem;
     font-weight: 400;
     color: var(--text-main);
     display: inline-flex;
@@ -238,14 +264,14 @@
   }
 
   .main-romaji {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--text-muted);
-    margin-top: 6px;
     font-style: italic;
+    line-height: 1;
   }
 
   .section {
-    margin-bottom: 28px;
+    margin-bottom: 18px;
   }
 
   .section-title {
@@ -253,7 +279,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-muted);
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     border-bottom: 1px solid var(--border-main);
     padding-bottom: 4px;
   }
@@ -310,8 +336,8 @@
   }
 
   .meaning-item {
-    margin-bottom: 20px;
-    line-height: 1.6;
+    margin-bottom: 16px;
+    line-height: 1.5;
     color: var(--text-main);
   }
 
@@ -329,15 +355,15 @@
   }
 
   .meta-badge {
-    font-size: 0.72rem;
-    font-weight: 600;
+    font-size: 0.68rem;
+    font-weight: 700;
     text-transform: uppercase;
     background-color: rgba(184, 44, 60, 0.08); /* Light accent background */
     color: var(--accent);
     padding: 1px 6px;
     border-radius: 4px;
     border: 1px solid rgba(184, 44, 60, 0.15); /* Accent outline border */
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -438,5 +464,41 @@
 
   .translation-term {
     font-weight: 500;
+  }
+
+  .pitch-graph-inline {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0px;
+  }
+
+  .mora {
+    position: relative;
+    display: inline-block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    padding: 2px 0px 2px 0px;
+    margin-right: -0.08em;
+    letter-spacing: -0.02em; 
+    border-top: 2px solid transparent; /* Holds the space for the overline */
+    border-right: 2px solid transparent;
+  }
+
+  /* Draws the vertical downstep drop line on the right edge of the mora */
+  .mora.downstep {
+    border-right-color: var(--accent);
+  }
+
+  :global(.mora.high) {
+    border-top-color: var(--accent, #b82c3c) !important; /* Fallback to crimson if --accent is missing */
+  }
+
+  :global(.mora.downstep) {
+    border-right-color: var(--accent, #b82c3c) !important;
+  }
+
+  .mora-text {
+    line-height: 1;
   }
 </style>

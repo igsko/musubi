@@ -18,8 +18,10 @@ export class DetailsState {
     this.#loadingDetails = true;
 
     try {
-      const jsonStr = await fetchEntryDetails(id);
-      this.selectedEntry = JSON.parse(jsonStr);
+      const payload = await fetchEntryDetails(id);
+      const entry = JSON.parse(payload.full_json);
+      entry.pitch_accent = payload.pitch_accent;
+      this.selectedEntry = entry;
     } catch (error) {
       console.error('Error fetching entry details:', error);
     } finally {

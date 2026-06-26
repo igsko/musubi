@@ -16,27 +16,30 @@ export class SearchState {
   /**
    * Handles user input in the search box with a debounce mechanism to prevent excessive API calls.
    * It fetches suggestions based on the current query and updates the suggestions list.
+   * Supports an optional debounce bypass
+   * @param {boolean} forceImmediate - If true, bypasses the 150ms debounce delay.
    * @returns {Promise<void>} A promise that resolves when the suggestions have been updated.
    */
-  async handleInput() {
+  async handleInput(forceImmediate = false) {
     clearTimeout(this.#debounceTimer);
 
-    // If the query is too short, clear suggestions immediately and exit
-    if (this.query.trim().length < 2) {
+    const activeQuery = this.query.trim();
+
+    // If the query is totally empty, clear suggestions immediately and exit
+    if (activeQuery.trim().length === 0) {
       this.suggestions = [];
       this.#hasMore = false;
       return;
     }
 
-    const activeQuery = this.query;
     this.#latestQuery = activeQuery;
 
-    // Set a 150ms debounce delay. If the user types another letter within 150ms, this block is canceled.
-    this.#debounceTimer = setTimeout(async () => {
+    const executeSearch = async () => {
       try {
         this.#hasMore = true;
         const results = await fetchSuggestions(activeQuery, 0);
         
+        // race condition protection
         if (this.#latestQuery === activeQuery) {
           this.suggestions = results;
           if (results.length < 20) {
@@ -45,8 +48,15 @@ export class SearchState {
         }
       } catch (error) {
         console.error("Error fetching suggestions:", error);
-      }
-    }, 150);
+      }     
+    };
+
+    if (forceImmediate) {
+      await executeSearch();
+    } else {
+      // Otherwise, keep the standard 150ms debounce delay
+      this.#debounceTimer = setTimeout(executeSearch, 150);
+    }
   }
 
   /**
