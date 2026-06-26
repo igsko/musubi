@@ -5,11 +5,82 @@
   import SearchBox from '$lib/components/SearchBox.svelte';
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
   import EntryDetails from '$lib/components/EntryDetails.svelte';
+
+  import { search, details } from '$lib/state.svelte.js';
+
+  function handleKeyDown(event) {
+    // focus search box with '/' or Ctrl+F/Cmd+F on macOS
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+    const isSearchTrigger = event.key === '/' || 
+                            (isMac ? event.metaKey : event.ctrlKey) && event.key.toLowerCase() === 'f';
+
+    console.log(event.key);
+
+    if (isSearchTrigger) {
+      // Find the input element
+      const input = document.querySelector('.search-box');
+      if (input && document.activeElement !== input) {
+        event.preventDefault();
+        input.focus();
+        input.select();
+      }
+      return;
+    }
+
+
+    // Navigate suggestion list with arrow keys
+    if (search.suggestions && search.suggestions.length > 0) {
+      const currentIndex = search.selectedIndex ?? -1;
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if(currentIndex === -1) {
+          search.selectedIndex = 1;
+        } else {
+          search.selectedIndex = Math.min(
+            search.selectedIndex + 1, 
+            search.suggestions.length - 1
+          );
+        }
+        scrollToActiveItem();
+      } 
+      else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          search.selectedIndex = currentIndex - 1;
+        } else {
+          search.selectedIndex = -1;
+        }
+        scrollToActiveItem();
+      } 
+      else if (event.key === 'Enter' && search.selectedIndex !== -1) {
+        event.preventDefault();
+        // Load the entry from search state
+        const selectedId = search.suggestions[currentIndex].id;
+        search.selectEntry(selectedId);
+      }
+    }
+  }
+
+  function scrollToActiveItem() {
+    setTimeout(() => {
+      const activeEl = document.querySelector('.suggestion-item.active');
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: 'nearest' });
+      }
+    }, 0);
+  }
 </script>
+
+<svelte:window onkeydown={handleKeyDown} />
 
 <Titlebar />
 
-<main class="container" class:tauri-desktop={isTauri}>
+<main 
+  class="container" 
+  class:tauri-desktop={isTauri}
+  class:has-selection={!!details?.selectedEntry}
+>
   <!-- search container -->
   <div class="search-section">
     <SearchBox />

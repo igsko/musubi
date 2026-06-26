@@ -1,4 +1,6 @@
-/* Global Resets */
+/* ==========================================
+   GLOBAL RESETS
+   ========================================== */
 * {
     margin: 0;
     padding: 0;
@@ -9,6 +11,7 @@
 /* Light Mode (Default) */
 :root {
   --bg-app: #faf8f5;
+  --bg-sidebar: #ededf0;
   --bg-card: #ffffff;
   --text-main: #2a2825;
   --text-muted: #706b64;
@@ -19,6 +22,7 @@
 /* Dark Mode (Overridden automatically) */
 :root.dark {
   --bg-app: #1a1a18;       /* Very dark warm charcoal */
+  --bg-sidebar: #131311;
   --bg-card: #242422;      /* Dark card fill */
   --text-main: #f0edea;    /* Soft off-white */
   --text-muted: #9e9a93;   /* Muted warm gray */
@@ -64,6 +68,7 @@ main.container {
     display: flex;
     flex-direction: column;
     position: relative;
+    background-color: var(--bg-app);
 }
 
 main.container.tauri-desktop {
@@ -83,12 +88,10 @@ main.container.tauri-desktop {
 
 .search-box-container {
     position: relative;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-main);
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);
     border-radius: 24px;
     overflow: hidden;
-
-    /* smooth transition for the border and glow */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -111,6 +114,8 @@ main.container.tauri-desktop {
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
+    background-color: var(--bg-card);
+    color: var(--text-main);
     transition: background-color 0.2s ease-out; /* Ensure both hover and mouseleave transition */
 }
 
@@ -124,6 +129,7 @@ main.container.tauri-desktop {
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
+    color: var(--text-muted);
 }
 
 .clear-btn {
@@ -131,10 +137,11 @@ main.container.tauri-desktop {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
+    color: var(--text-muted);
 }
 
-.clear-icon-svg {
-
+.clear-btn:hover {
+    color: var(--text-main);
 }
 
 /* =================================*********
@@ -145,16 +152,16 @@ main.container.tauri-desktop {
     flex-direction: column;
 
     max-height: 250px;
-    overflow-y: auto; /* Adds a scrollbar only when items exceed max-height */
+    overflow-y: auto; /* adds a scrollbar only when items exceed max-height */
 
-    position: absolute; /* Floats the list so it doesn't push down the rest of UI */
+    position: absolute;
     width: 100%;
-    z-index: 10;        /* Ensures it sits on top of cards or other text beneath it */
+    z-index: 10;
     box-sizing: border-box;
 
     /* visual */
-    background-color: inherit; /* Matches the background of the search box */
-    border: 1px solid #e0e0e0;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-main);
     border-top: none;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 0 0 4px 4px;
@@ -183,9 +190,9 @@ main.container.tauri-desktop {
     align-items: center;
     width: 100%;
     border: none;
-    border-bottom: #4a4a4a 1px solid;
+    border-bottom: 1px solid var(--border-main);
     background: transparent;
-    color: #5f5f5f;
+    color: var(--text-main);
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
@@ -194,14 +201,17 @@ main.container.tauri-desktop {
     background-color: #e5e5e5;
 }
 
+:root.dark .dropdown li:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
 /* Hover effect for the close button is traditionally red */
 .dropdown li.close-btn:hover {
-    background-color: #e81123;
-    color: #ffffff;
+    background-color: #e81123 !important;
+    color: #ffffff !important;
 }
 
 .dropdown li button {
-    font-size: 1.5rem;
     text-align: left;
     width: 100%;
 }
@@ -221,9 +231,14 @@ main.container.tauri-desktop {
     gap: 4px; /* Small vertical gap between Japanese word and translation */
 }
 
+.dropdown li.active {
+    background-color: rgba(184, 44, 60, 0.08);
+    border-left: 3px solid var(--accent);
+}
+
 .japanese-word {
-    font-size: 1.5rem;
-    color: #111;
+    font-size: 1.3rem;
+    color: var(--text-main);
     display: inline-flex;
     align-items: baseline;
     line-height: 1;
@@ -235,39 +250,36 @@ main.container.tauri-desktop {
 
 .furigana {
     font-size: 0.55em;
-    color: #888;
+    color: var(--text-muted);
     letter-spacing: 0.02em;
     padding-bottom: 2px;
     user-select: none;
 }
 
-.kana-only {
-    /* Inherits the 1.5rem font-size from parent button */
-}
-
 .translation {
-    font-size: 0.9rem;
-    color: #4a4a4a;
+    font-size: 0.85rem;
+    color: var(--text-muted);
     margin-top: 2px;
     padding-left: 4px;
 }
 
 .view-section {
     flex-grow: 1;
-    position: relative; /* Acts as the anchor for absolute elements */
+    position: relative;
     overflow: hidden;
 }
 
-/* Desktop Detail Card Styling */
+/* Detail Card base styling */
 .card {
     height: 100%;
     overflow-y: auto;
     padding: 16px;
     background-color: var(--bg-card);
+    color: var(--text-main);
 }
 
 .back-btn {
-    display: none; /* Hidden by default on desktop viewports */
+    display: none;
 }
 
 /* =================================*********
@@ -275,53 +287,99 @@ main.container.tauri-desktop {
    ================================********* */
 .custom-titlebar {
     height: 32px;
-    background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border-main);
     display: flex;
-    flex-direction: row; /* Fixed from 'direction: row' */
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: row;
+    align-items: stretch;
     cursor: default;
     -webkit-user-select: none;
     user-select: none;
+    border-bottom: 1px solid var(--border-main);
+    box-sizing: border-box;
+}
+
+.titlebar-section {
+    display: flex;
+    height: 100%;
+    box-sizing: border-box;
+    border: none;
+}
+
+.titlebar-section.left {
+    width: 360px;
+    background-color: var(--bg-card);
+    align-items: center;
+    padding-left: 12px;
+}
+
+.titlebar-section.right {
+    flex-grow: 1;
+    background-color: var(--bg-card);
+    justify-content: flex-end;
+    align-items: stretch;
 }
 
 .app-title {
-    font-size: 12px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
     font-weight: 500;
     color: var(--text-muted);
-    padding-left: 12px;
 }
 
 .window-controls {
     display: flex;
+    align-items: stretch;
     height: 100%;
 }
 
 .control-btn {
     height: 100%;
-    width: 32px;
+    width: 44px;
     background-color: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
+    color: var(--text-muted);
+    transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .control-btn:hover {
-    background-color: var(--bg-card);
+    background-color: rgba(0, 0, 0, 0.06);
+    color: var(--text-main);
+}
+
+:root.dark .control-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .close-btn:hover {
-    background-color: var(--accent) !important;
+    background-color: #e81123 !important;
     color: white !important;
 }
 
-/* Responsive (Mobile) Layout */
+/* ==========================================
+   RESPONSIVE (MOBILE) VIEWPORTS
+   ========================================== */
 @media (max-width: 600px) {
-    /* On mobile, make the card an absolute overlay */
+    .titlebar-section.left {
+        width: auto;
+        flex-grow: 1;
+        background-color: var(--bg-card); 
+        border-right: none;
+    }
+
+    .titlebar-section.right {
+        flex-grow: 0;
+        background-color: var(--bg-card);
+    }
+
+    /* 
+       On mobile, hide the detail card wrapper by default.
+       It will pop up absolutely only when there is an active selection.
+    */
     .card {
+        display: none; 
         position: absolute;
         top: 0;
         left: 0;
@@ -329,9 +387,13 @@ main.container.tauri-desktop {
         height: 100%;
         z-index: 20; /* Displays on top of suggestions list */
         background-color: var(--bg-card);
-        display: flex;
         flex-direction: column;
         padding: 0;
+    }
+
+    /* Displays the card container once selection state is toggled on main.container */
+    main.container.has-selection .card {
+        display: flex;
     }
 
     .card-content {
@@ -383,8 +445,10 @@ main.container.tauri-desktop {
     .search-section {
         grid-column: 1;
         grid-row: 1;
-        padding: 8px 8px 0px 8px;
-        margin-bottom: 8px;
+        padding: 8px 8px 8px 8px;
+        margin-bottom: 0px;
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-main);
     }
 
     /* 
@@ -409,11 +473,12 @@ main.container.tauri-desktop {
         overflow-y: auto;
         
         /* Spacing & borders to match the searchbox margins */
-        margin: 0px 8px 8px 8px;
-        border: 1px solid var(--border-main) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important;
-        background-color: var(--bg-card) !important;
+        margin: 0px;
+        border: none !important;
+        border-right: 1px solid var(--border-main) !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+        background-color: var(--bg-sidebar) !important;
     }
 
     /* position the card on the right spanning both rows.*/
@@ -422,9 +487,9 @@ main.container.tauri-desktop {
         grid-row: 1 / 3 !important; /* Spans from row 1 to row 3 */
         height: 100%;
         overflow-y: auto;
-        padding: 16px;
+        padding: 24px;
         background-color: var(--bg-card);
-        border-left: 1px solid var(--border-main); /* column separator */
+        border-left: none;
     }
 
     .back-btn {

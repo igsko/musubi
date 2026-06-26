@@ -1,4 +1,5 @@
 <script>
+  //@ts-nocheck
   import { onMount } from 'svelte';
   import { user } from '$lib/state.svelte.js';
   import '../app.css';

@@ -37,7 +37,8 @@ export class SearchState {
     const executeSearch = async () => {
       try {
         this.#hasMore = true;
-        const results = await fetchSuggestions(activeQuery, 0);
+        const results = (await fetchSuggestions(activeQuery, 0)) ?? [];
+        this.suggestions = results;
         
         // race condition protection
         if (this.#latestQuery === activeQuery) {

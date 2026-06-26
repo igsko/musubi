@@ -76,18 +76,18 @@ export async function fetchEntryDetails(id) {
 // Safe window control wrappers
 export async function minimizeWindow() {
   if (isTauri) {
-    getCurrentWindow().minimize();
+    tauriGetCurrentWindow().minimize();
   }
 }
 
 export async function toggleMaximizeWindow() {
   if (isTauri) {
-    getCurrentWindow().toggleMaximize();
+    tauriGetCurrentWindow().toggleMaximize();
   }
 }
 
 export async function closeWindow() {
   if (isTauri) {
-    getCurrentWindow().close();
+    tauriGetCurrentWindow().close();
   }
 }
