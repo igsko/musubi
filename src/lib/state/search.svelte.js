@@ -7,6 +7,7 @@ import { fetchSuggestions } from '$lib/services/platform.js';
 export class SearchState {
   query = $state('');
   suggestions = $state([]);
+  loading = $state([]);
 
   #debounceTimer = null;
   #latestQuery = '';
@@ -29,10 +30,13 @@ export class SearchState {
     if (activeQuery.trim().length === 0) {
       this.suggestions = [];
       this.#hasMore = false;
+      this.loading = false;
       return;
     }
 
     this.#latestQuery = activeQuery;
+
+    this.loading = true;
 
     const executeSearch = async () => {
       try {
@@ -46,9 +50,13 @@ export class SearchState {
           if (results.length < 20) {
             this.#hasMore = false;
           }
+          this.loading = false;
         }
       } catch (error) {
         console.error("Error fetching suggestions:", error);
+        if (this.#latestQuery === activeQuery) {
+          this.loading = false;
+        }
       }     
     };
 
@@ -69,6 +77,7 @@ export class SearchState {
     if (this.#loadingMore || !this.#hasMore) return;
 
     this.#loadingMore = true;
+    this.loading = true;
     const activeQuery = this.query;
     const currentOffset = this.suggestions.length;
 
@@ -86,6 +95,7 @@ export class SearchState {
       console.error("Error loading more suggestions:", error);
     } finally {
       this.#loadingMore = false;
+      this.loading = false;
     }
   }
 
@@ -95,5 +105,6 @@ export class SearchState {
     clearTimeout(this.#debounceTimer);
     this.suggestions = [];
     this.#hasMore = false;
+    this.loading = false;
   }
 }
