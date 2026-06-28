@@ -6,18 +6,18 @@
   function getFrequencyMilestone(rank) {
     if (!rank) return null;
 
-    // crimson - essential
+    // crimson
     if (rank <= 100)   return { text: '100',  tier: 'tier-100' };
     if (rank <= 250)   return { text: '250',  tier: 'tier-250' };
-    // slate blue - frequent daily
+    // slate blue
     if (rank <= 500)   return { text: '500',  tier: 'tier-500' };
     if (rank <= 1000)  return { text: '1k',  tier: 'tier-1k' };
-    // amber - conversational
+    // amber
     if (rank <= 2000)  return { text: '2k',  tier: 'tier-2k' };
     if (rank <= 5000)  return { text: '5k',  tier: 'tier-5k' };
-    // sand - intermediate reading
+    // sand
     if (rank <= 7500)  return { text: '7.5k', tier: 'tier-75k' };
-    // slate gray - advanced, specialized
+    // slate gray
     if (rank <= 10000) return { text: '10k', tier: 'tier-10k' };
     if (rank <= 15000) return { text: '15k',  tier: 'tier-15k' };
     if (rank <= 20000) return { text: '20k', tier: 'tier-20k' };
@@ -37,8 +37,8 @@
   }
 </script>
 
-{#if search.suggestions.length > 0}
-  <ul class="dropdown" onscroll={handleScroll}>
+<ul class="dropdown" onscroll={handleScroll}>
+  {#if search.suggestions.length > 0}
     {#each search.suggestions as sug, idx (sug.id)}
       <li class:active={search.selectedIndex === idx}>
         <button type="button" onclick={
@@ -93,38 +93,32 @@
         <div class="skeleton-shimmer inline-shimmer"></div>
       </li>
     {/if}
-  </ul>
-{:else if search.loading}
-  <!-- Initial search query placeholder skeletons -->
-  <div class="dropdown placeholder-list">
+
+  {:else if search.loading && search.query.trim().length > 0}
+    <!-- Initial search query placeholder skeletons -->
     {#each Array(6) as _, i}
-      <div class="skeleton-item">
+      <li class="skeleton-item">
         <div class="skeleton-shimmer title-shimmer"></div>
         <div class="skeleton-shimmer body-shimmer"></div>
-      </div>
+      </li>
     {/each}
-  </div>
-{/if}
+  {/if}
+</ul>
+
 
 <style>
   .dropdown {
       display: flex;
       flex-direction: column;
 
-      max-height: 250px;
+      height: 100%;
       overflow-y: auto; /* adds a scrollbar only when items exceed max-height */
-
-      position: absolute;
-      width: 100%;
-      z-index: 10;
-      box-sizing: border-box;
 
       /* visual */
       background-color: var(--bg-card);
-      border: 1px solid var(--border-main);
-      border-top: none;
+      border-right: 1px solid var(--border-main);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 0 0 4px 4px;
+      list-style: none;
   }
 
   .dropdown::-webkit-scrollbar {
@@ -189,7 +183,6 @@
       flex-direction: column;
       align-items: stretch;
       gap: 3px; /* Small vertical gap between Japanese word and translation */
-      overflow: hidden;
   }
 
   .suggestion-row {
@@ -260,6 +253,7 @@
     border: none;
     white-space: nowrap;
     letter-spacing: 0.03em;
+    border: none;
   }
 
   /* CRIMSON FAMILY*/
@@ -362,6 +356,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    list-style: none;
   }
 
   .skeleton-inline-row {
