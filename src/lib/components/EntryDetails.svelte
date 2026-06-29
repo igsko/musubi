@@ -208,12 +208,18 @@
 {/if}
 
 <style>
-  /* 
-    The layout and container styling of ".card", ".card-content" and ".back-btn" 
-    are handled by global app.css
+  /* Detail Card base styling */
+  .card {
+      height: 100%;
+      overflow-y: auto;
+      padding: 16px;
+      background-color: var(--bg-card);
+      color: var(--text-main);
+  }
 
-    We style the interior typography and component design elements here.
-  */
+  .back-btn {
+      display: none;
+  }
 
   .card-header {
     margin-bottom: 16px;
@@ -454,5 +460,68 @@
 
   .translation-term {
     font-weight: 500;
+  }
+
+  @media (max-width: 600px) {
+    .card {
+      display: none; 
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20; 
+      background-color: var(--bg-card);
+      flex-direction: column;
+      padding: 0;
+    }
+
+    /* Show absolute overlay on mobile when a selection occurs */
+    :global(main.container.has-selection) .card {
+      display: flex;
+    }
+
+    .card-content {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 8px 16px 16px 16px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 12px 16px 4px 16px;
+      background-color: transparent !important;
+      border-bottom: none;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: text-decoration 0.1s ease;
+    }
+
+    .back-btn:hover {
+      background-color: transparent !important;
+      text-decoration: underline; 
+    }
+  }
+
+  @media (min-width: 601px) {
+    /* position the card on the right spanning both rows.*/
+    .card {
+      grid-column: 2 !important;
+      grid-row: 1 / 3 !important; 
+      height: 100%;
+      overflow-y: auto;
+      padding: 24px;
+      background-color: var(--bg-card);
+      border-left: none;
+    }
+
+    .back-btn {
+      display: none !important;
+    }
   }
 </style>

@@ -68,5 +68,61 @@
 </div>
 
 <style>
+  .search-box-container {
+      position: relative;
+      border: 1px solid var(--border-main);
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
 
+  .search-box-container:hover {
+      border-color: #c1c9d3; /* Change border color on hover */
+      box-shadow: 0 0 0 3px rgba(181, 184, 189, 0.15); /* Subtle glow effect */
+      transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Smooth transition for hover effect */
+  }
+
+  .search-box-container:focus-within {
+      border-color: #4a5568;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .search-box {
+      padding: 14px 48px 14px 16px;
+      width: 100%;
+      border-radius: 24px;
+      outline: none; 
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      transition: background-color 0.2s ease-out; /* Ensure both hover and mouseleave transition */
+  }
+
+  .search-box:hover {
+      background-color: var(--bg-card); /* Slightly lighter background on hover */
+  }
+
+  .search-icon-svg {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+  }
+
+  .clear-btn {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+  }
+
+  .clear-btn:hover {
+      color: var(--text-main);
+  }
 </style>

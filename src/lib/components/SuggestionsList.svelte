@@ -415,4 +415,24 @@
       border-radius: 0;
     }
   }
+  /* desktop responsivity */
+  @media (min-width: 601px) {
+    .dropdown {
+      grid-column: 1 !important;
+      grid-row: 2 !important;
+      
+      position: static !important;
+      width: auto !important;
+      max-height: none !important;
+      height: 100% !important;
+      overflow-y: auto;
+      
+      margin: 0px;
+      border: none !important;
+      border-right: 1px solid var(--border-main) !important;
+      border-radius: 0px !important;
+      box-shadow: none !important;
+      background-color: var(--bg-sidebar) !important;
+    }
+  }
 </style>

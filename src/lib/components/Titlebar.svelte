@@ -36,4 +36,91 @@
 </div>
 
 <style>
+  .custom-titlebar {
+      height: 32px;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      cursor: default;
+      -webkit-user-select: none;
+      user-select: none;
+      border-bottom: 1px solid var(--border-main);
+      box-sizing: border-box;
+  }
+
+  .titlebar-section {
+      display: flex;
+      height: 100%;
+      box-sizing: border-box;
+      border: none;
+  }
+
+  .titlebar-section.left {
+      width: 360px;
+      background-color: var(--bg-card);
+      align-items: center;
+      padding-left: 12px;
+  }
+
+  .titlebar-section.right {
+      flex-grow: 1;
+      background-color: var(--bg-card);
+      justify-content: flex-end;
+      align-items: stretch;
+  }
+
+  .app-title {
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      font-weight: 500;
+      color: var(--text-muted);
+  }
+
+  .window-controls {
+      display: flex;
+      align-items: stretch;
+      height: 100%;
+  }
+
+  .control-btn {
+      height: 100%;
+      width: 44px;
+      background-color: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      color: var(--text-muted);
+      transition: background-color 0.12s ease, color 0.12s ease;
+  }
+
+  .control-btn:hover {
+      background-color: rgba(0, 0, 0, 0.06);
+      color: var(--text-main);
+  }
+
+  :global(dark) .control-btn:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .close-btn:hover {
+      background-color: #e81123 !important;
+      color: white !important;
+  }
+
+  /* titlebar responsive collapse for mobile viewports */
+  @media (max-width: 600px) {
+    .titlebar-section.left {
+      width: auto;
+      flex-grow: 1;
+      background-color: var(--bg-card); 
+      border-right: none;
+    }
+
+    .titlebar-section.right {
+      flex-grow: 0;
+      background-color: var(--bg-card);
+    }
+  }
 </style>
