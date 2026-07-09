@@ -26,6 +26,8 @@ export class SearchState {
 
     const activeQuery = this.query.trim();
 
+    this.#latestQuery = activeQuery;
+
     // If the query is totally empty, clear suggestions immediately and exit
     if (activeQuery.trim().length === 0) {
       this.suggestions = [];
@@ -104,6 +106,7 @@ export class SearchState {
   clear() {
     clearTimeout(this.#debounceTimer);
     this.suggestions = [];
+    this.#latestQuery = '';
     this.#hasMore = false;
     this.loading = false;
   }

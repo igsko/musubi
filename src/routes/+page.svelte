@@ -5,16 +5,15 @@
   import SearchBox from '$lib/components/SearchBox.svelte';
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
   import EntryDetails from '$lib/components/EntryDetails.svelte';
+  import SettingsMenu from '$lib/components/SettingsMenu.svelte';
 
-  import { search, details } from '$lib/state.svelte.js';
+  import { search, details, uiState } from '$lib/state.svelte.js';
 
   function handleKeyDown(event) {
     // focus search box with '/' or Ctrl+F/Cmd+F on macOS
     const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
     const isSearchTrigger = event.key === '/' || 
                             (isMac ? event.metaKey : event.ctrlKey) && event.key.toLowerCase() === 'f';
-
-    console.log(event.key);
 
     if (isSearchTrigger) {
       // Find the input element
@@ -26,7 +25,6 @@
       }
       return;
     }
-
 
     // Navigate suggestion list with arrow keys
     if (search.suggestions && search.suggestions.length > 0) {
@@ -57,7 +55,15 @@
         event.preventDefault();
         // Load the entry from search state
         const selectedId = search.suggestions[currentIndex].id;
-        search.selectEntry(selectedId);
+        (async () => {
+          try {
+            await search.selectEntry(selectedId);
+          } catch (err) {
+            console.error("Keyboard selection state update failed:", err);
+          } finally {
+            uiState.closeSettings();
+          }
+        })();
       }
     }
   }
@@ -79,7 +85,7 @@
 <main 
   class="container" 
   class:tauri-desktop={isTauri}
-  class:has-selection={!!details?.selectedEntry}
+  class:has-selection={!!details?.selectedEntry || uiState.currentView === 'settings'}
 >
   <!-- search container -->
   <div class="search-section">
@@ -89,7 +95,11 @@
   <!-- content viewport -->
   <div class="view-section">
     <SuggestionsList />
-    <EntryDetails />
+    {#if uiState.currentView === 'settings'}
+      <SettingsMenu />
+    {:else}
+      <EntryDetails />
+    {/if}
   </div>
 
 </main>

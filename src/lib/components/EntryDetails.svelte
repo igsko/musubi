@@ -86,10 +86,6 @@
 
 {#if details.selectedEntry}
   <div class="card">
-    <!-- 
-      Mobile-only Back Button.
-      Resolves to the global action to return to search suggestions.
-    -->
     <button class="back-btn" onclick={() => goBack()}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -117,7 +113,6 @@
 
           <div class="header-sub-line">
             <span class="main-romaji">{firstHW.romaji}</span>
-            <!-- PITCH ACCENT GRAPH (if available in the db) -->
             {#if details.selectedEntry.pitch_accent}
               <PitchAccent pitch={details.selectedEntry.pitch_accent} />
             {/if}
@@ -125,24 +120,26 @@
         {/if}
       </header>
 
-      <!-- ALTERNATIVE SPELLINGS (if multiple exist) -->
+      <!-- ALTERNATIVE SPELLINGS (Clean Comma-Separated List) -->
       {#if details.selectedEntry.headwords.length > 1}
         <section class="section">
           <h3 class="section-title">Inne pisownie / odczyty</h3>
-          <div class="spelling-tags">
+          <div class="spelling-list">
             {#each details.selectedEntry.headwords.slice(1) as hw}
               {const p = splitJapanese(hw.japanese)}
-              <span class="spelling-tag">
+              <span class="spelling-item">
                 <span class="spelling-core">
                   {#if p.kanji}
-                    <span class="tag-kanji">{p.kanji}</span> <span class="tag-kana">【{p.kana}】</span>
+                    <span class="tag-kanji">{p.kanji}</span>
+                    <span class="tag-kana">({p.kana})</span>
                   {:else}
                     <span class="tag-kana">{p.kana}</span>
                   {/if}
-                  <span class="tag-romaji">({hw.romaji})</span>
+                  <span class="tag-romaji">{hw.romaji}</span>
                 </span>
+
                 {#if hw.note}
-                  <span class="tag-note">— {hw.note}</span>
+                  <span class="tag-note">[{hw.note}]</span>
                 {/if}
               </span>
             {/each}
@@ -155,50 +152,53 @@
         <h3 class="section-title">Znaczenia</h3>
         <ol class="meanings-list">
           {#each details.selectedEntry.meanings as meaning}
+            {const seeAlsos = meaning.metadata ? meaning.metadata.map(parseSeeAlso).filter(Boolean) : []}
+            {const posTags = meaning.metadata ? meaning.metadata.filter(isPartOfSpeechTag).map(cleanPartsOfSpeech) : []}
+            {const categoryTags = meaning.metadata ? meaning.metadata.filter(isCategory) : []}
+            {const contextTags = meaning.metadata ? meaning.metadata.filter(meta => !parseSeeAlso(meta) && !isPartOfSpeechTag(meta) && !isCategory(meta)) : []}
             <li class="meaning-item">
-              <!-- Metadata and Interactive Badges -->
-              {#if meaning.metadata && meaning.metadata.length > 0}
-                <div class="metadata-badges">
-                  {#each meaning.metadata as meta}
-                    <!-- Check if this specific metadata is a redirect link -->
-                     {const seeAlso = parseSeeAlso(meta)}
-                     {#if seeAlso}
-                      <!-- Render as an interactive button link -->
-                      <button 
-                        type="button" 
-                        class="meta-badge see-also-btn" 
-                        onclick={() => goToWord(seeAlso.keyword)}
-                      >
-                        <span class="see-also-label">ZOBACZ RÓWNIEŻ</span>
-                        <span class="see-also-target">{seeAlso.display}</span>
-                         <!-- inline arrow indicating redirection navigation -->
-                        <svg class="see-also-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                          <line x1="5" y1="12" x2="19" y2="12"></line>
-                          <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                      </button>
-                      {:else if isPartOfSpeechTag(meta)}
-                        <!-- Render as a part of speech badge -->
-                        <span class="meta-badge pos-badge">{cleanPartsOfSpeech(meta)}</span>
-                      {:else if isCategory(meta)}
-                        <!-- Render as a category badge -->
-                        <span class="meta-badge category-badge">{meta}</span>
-                      {:else}
-                        <!-- render as static badge -->
-                        <span class="meta-badge context-badge">{meta}</span>
-                      {/if}
+              <!-- parts of speech -->
+              {#if posTags.length > 0}
+                <span class="meaning-pos">{posTags.join(', ')}</span>
+              {/if}
+
+              <!-- badges -->
+              <div class="meaning-body">
+                {#if categoryTags.length > 0 || contextTags.length > 0}
+                  <span class="inline-badges">
+                    {#each categoryTags as cat}
+                      <span class="meta-badge category-badge">{cat}</span>
+                    {/each}
+                    {#each contextTags as ctx}
+                      <span class="meta-badge context-badge">{ctx}</span>
+                    {/each}
+                  </span>
+                {/if}
+
+                <span class="translations-list">
+                  {#each meaning.translations as trans, t_idx}
+                    <span class="translation-term">
+                      {trans}{t_idx < meaning.translations.length - 1 ? ', ' : ''}
+                    </span>
+                  {/each}
+                </span>
+              </div>
+
+              <!-- see also footer -->
+              {#if seeAlsos.length > 0}
+                <div class="see-also-footer">
+                  {#each seeAlsos as seeAlso}
+                    <button 
+                      type="button" 
+                      class="see-also-link" 
+                      onclick={() => goToWord(seeAlso.keyword)}
+                    >
+                      <span class="see-also-arrow">→</span>
+                      zobacz również:&nbsp;<span class="see-also-target">{seeAlso.display}</span>
+                    </button>
                   {/each}
                 </div>
               {/if}
-
-              <!-- translation list -->
-              <div class="translations-list">
-                {#each meaning.translations as trans, t_idx}
-                  <span class="translation-term">
-                    {trans}{t_idx < meaning.translations.length - 1 ? ', ' : ''}
-                  </span>
-                {/each}
-              </div>
             </li>
           {/each}
         </ol>
@@ -280,51 +280,62 @@
     padding-bottom: 4px;
   }
 
-  .spelling-tags {
+  .spelling-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px 12px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    width: 100%;
   }
 
-  .spelling-tag {
-    font-size: 0.95rem;
-    background-color: var(--bg-app);
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-main);
-    color: var(--text-main);
+  .spelling-item {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     flex-wrap: wrap;
-    gap: 4px;
+  }
+
+  /* adds a comma after every spelling item except the last one in the container */
+  .spelling-item:not(:last-child)::after {
+    content: ',';
+    color: var(--text-muted);
+    margin-left: 0px;
   }
 
   .spelling-core {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
+    gap: 4px;
     white-space: nowrap;
   }
 
   .tag-kanji {
-    font-weight: bold;
+    font-weight: 600;
+    color: var(--text-muted);
   }
 
   .tag-kana {
-    color: var(--text-main);
-    margin-left: 2px;
+    color: var(--text-muted);
   }
 
   .tag-romaji {
     font-size: 0.85em;
     color: var(--text-muted);
-    margin-left: 6px;
+    margin-left: 4px;
+    font-style: italic;
   }
 
   .tag-note {
     font-size: 0.8em;
-    color: #cc3300; /* Muted crimson accent for inline annotations */
+    color: var(--accent);
     margin-left: 6px;
     font-style: italic;
+  }
+
+  .spelling-separator {
+    color: var(--text-muted);
+    margin-left: -10px;
+    margin-top: 2px;
   }
 
   .meanings-list {
@@ -343,94 +354,61 @@
     font-weight: bold;
   }
 
-  .metadata-badges {
+  .meaning-pos {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #2b6cb0;
+    margin-bottom: 4px;
+    font-weight: 500;
+    text-transform: lowercase;
+  }
+
+  :global(.dark) .meaning-pos {
+    color: #90cdf4;
+  }
+
+  .meaning-body {
     display: flex;
+    align-items: baseline;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 3px;
+  }
+
+  .inline-badges {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-right: 2px;
+  }
+
+  .translations-list {
+    font-size: 1.1rem;
+    color: var(--text-main);
+  }
+
+  .translation-term {
+    font-weight: 500;
   }
 
   .meta-badge {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    background-color: rgba(184, 44, 60, 0.08); /* Light accent background */
-    color: var(--accent);
     padding: 1px 6px;
     border-radius: 4px;
-    border: 1px solid rgba(184, 44, 60, 0.15); /* Accent outline border */
     letter-spacing: 0.04em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    vertical-align: middle;
     min-height: 22px;
     line-height: normal;
   }
 
-  .see-also-btn {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    
-    background-color: var(--bg-card) !important;
-    color: var(--accent) !important;
-    border: 1px solid var(--border-main) !important;
-    padding: 2px 10px 2px 8px !important;
-    border-radius: 4px !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    
-    transition: 
-      background-color 0.15s ease, 
-      border-color 0.15s ease, 
-      color 0.15s ease, 
-      transform 0.15s ease, 
-      box-shadow 0.15s ease;
-  }
-
-  .see-also-btn:hover {
-    background-color: var(--bg-app) !important; /* Soft shift on hover */
-    border-color: var(--accent) !important;     /* Crimson border highlights on hover */
-    box-shadow: 0 3px 8px rgba(184, 44, 60, 0.12); /* Soft crimson glow on hover */
-    transform: translateY(-1px);                 /* Micro-lift effect */
-  }
-
-  .see-also-btn:active {
-    transform: translateY(0px);
-  }
-
-  .see-also-label {
-    font-weight: 700;
-    opacity: 0.8;
-    letter-spacing: 0.04em;
-  }
-
-  .see-also-target {
-    text-transform: none !important;
-    font-weight: bold;
-    text-decoration: underline; /* Native hyperlink underline */
-    text-underline-offset: 2px;  /* Spacing between text and underline */
-  }
-
-  .see-also-arrow {
-    margin-left: 2px;
-    transition: transform 0.15s ease; /* Animate the arrow slide */
-  }
-
-  .see-also-btn:hover .see-also-arrow {
-    transform: translateX(2px);
-  }
-
-  .pos-badge {
-    background-color: rgba(49, 130, 206, 0.08); /* Soft blue background */
-    color: #2b6cb0;                              /* Slate blue text */
-    border: 1px solid rgba(49, 130, 206, 0.18);
-  }
-
   .category-badge {
-    background-color: rgba(214, 158, 46, 0.08); /* Soft translucent gold background */
-    color: #b7791f;                              /* Muted gold/amber text */
+    background-color: rgba(214, 158, 46, 0.08); /* gold background */
+    color: #b7791f;                              /* gold text */
     border: 1px solid rgba(214, 158, 46, 0.18);
   }
 
@@ -447,19 +425,46 @@
     border: 1px solid rgba(184, 44, 60, 0.15);
   }
 
-  /* Dark mode override for the blue badges */
-  :global(.dark) .pos-badge {
-    background-color: rgba(99, 179, 237, 0.1);
-    color: #90cdf4;
-    border: 1px solid rgba(99, 179, 237, 0.2);
+  .see-also-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .translations-list {
-    font-size: 1.1rem;
+  .see-also-link {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: fit-content;
+    padding: 2px 0;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.15s ease;
   }
 
-  .translation-term {
-    font-weight: 500;
+  .see-also-link:hover {
+    color: var(--accent);
+  }
+
+  .see-also-arrow {
+    color: var(--accent);
+    font-weight: bold;
+    margin-right: 6px;
+    margin-left: 2px;
+    transition: transform 0.15s ease; /* Animate the arrow slide */
+  }
+
+  .see-also-link:hover .see-also-arrow {
+    transform: translateX(2px);
+  }
+
+  .see-also-target {
+    font-weight: bold;
+    text-decoration: underline; /* Native hyperlink underline */
+    text-underline-offset: 2px;  /* Spacing between text and underline */
   }
 
   @media (max-width: 600px) {

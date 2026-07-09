@@ -2,37 +2,24 @@
 import {SearchState} from '$lib/state/search.svelte.js';
 import {DetailsState} from '$lib/state/details.svelte.js';
 import {UserState} from '$lib/state/user.svelte.js';
+import {UIState} from '$lib/state/ui.svelte.js';
 
 // This file serves as a centralized state management module for the application, 
 // aggregating the search, details, and user states into a single exportable object.
 // It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
 export const search = new SearchState();
 pub_search();
-
-function pub_search() {
-  // Organizer wrapper
-}
+function pub_search() {}
 
 export const details = new DetailsState();
 pub_details();
-
-function pub_details() {
-  // Organizer wrapper
-}
+function pub_details() {}
 
 export const user = new UserState();
 pub_user();
+function pub_user() {}
 
-function pub_user() {
-  // Organizer wrapper
-}
-
-// Global "Search and jump" redirect action
-pub_goToWord();
-
-function pub_goToWord() {
-  // Organizer wrapper
-}
+export const uiState = new UIState();
 
 export async function goToWord(keyword) {
     // Update the search box UI so the user knows where they navigated to
@@ -55,13 +42,6 @@ export async function goToWord(keyword) {
     } catch (err) {
         console.error("Error in goToWord navigation:", err);
     }
-}
-
-// Global "Go back" action
-pub_goBack();
-
-function pub_goBack() {
-  // Organizer wrapper
 }
 
 export function goBack() {

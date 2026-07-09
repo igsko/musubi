@@ -1,6 +1,6 @@
 <script>
   //@ts-nocheck
-  import { search, details, user } from '$lib/state.svelte.js';
+  import { search, details, user, uiState } from '$lib/state.svelte.js';
   import { segmentFurigana } from '$lib/utils/furigana.js';
 
   function getFrequencyMilestone(rank) {
@@ -42,11 +42,18 @@
     {#each search.suggestions as sug, idx (sug.id)}
       <li class:active={search.selectedIndex === idx}>
         <button type="button" onclick={
-          async () => {
-            search.selectedIndex = idx;       // synchronize index on click
-            await details.selectWord(sug.id); // load details in details state
-            await user.addToHistory(sug.id);  // add to history in user state
-            search.clear();                   // close dropdown in search state
+          () => {
+            search.selectedIndex = idx;         // synchronize index
+
+            // switch view and clear list instantly
+            uiState.closeSettings();           
+
+            details.selectWord(sug.id).catch(err => {
+              console.error("Failed to load entry details:", err);
+            });
+            user.addToHistory(sug.id).catch(err => {
+              console.error("Failed to add entry to history:", err);
+            });
           }} 
           class="suggestion-btn"
         >

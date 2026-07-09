@@ -15,8 +15,12 @@ export class UserState {
    * @returns {Promise<void>} A promise that resolves when the user state has been initialized.
    */
   async init() {
-    this.bookmarks = await getValue('bookmarks', []);
-    this.history = await getValue('history', []);
+    const savedBookmarks = await getValue('bookmarks', []);
+    const savedHistory = await getValue('history', []);
+
+    // if the store returns undefined/null, fallback to an empty array to avoid errors
+    this.bookmarks = Array.isArray(savedBookmarks) ? savedBookmarks : [];
+    this.history = Array.isArray(savedHistory) ? savedHistory : [];
   }
 
   /**
@@ -24,6 +28,10 @@ export class UserState {
    * @param {string} id
    */
   async toggleBookmark(id) {
+    if (!Array.isArray(this.bookmarks)) {
+      this.bookmarks = [];
+    }
+    
     if (this.bookmarks.includes(id)) {
       this.bookmarks = this.bookmarks.filter(bookmarkId => bookmarkId !== id);
     } else {
@@ -38,7 +46,11 @@ export class UserState {
    * @param {string} id
    */
   async addToHistory(id) {
-    if(!this.history.includes(id)) {
+    if (!Array.isArray(this.history)) {
+      this.history = [];
+    }
+
+    if (!this.history.includes(id)) {
       this.history.unshift(id);
       this.history = this.history.slice(0, 50); // Limit history to last 50 entries
     }
