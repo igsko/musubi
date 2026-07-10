@@ -1,15 +1,12 @@
 <script>
- import { uiState } from '$lib/state.svelte.js';
+  //@ts-nocheck
+  import { uiState, settings } from '$lib/state.svelte.js';
 
   let props = $props();
 
   function handleClose() {
     props.onClose ? props.onClose() : uiState.closeSettings();
   }
-
-  let activeTheme = $state('system'); // 'light' | 'dark' | 'system'
-  let showFurigana = $state(true);
-  let compactLayout = $state(false);
 </script>
 
 <div class="settings-container">
@@ -39,22 +36,22 @@
             <div class="segmented-control">
               <button 
                 class="segment-btn" 
-                class:active={activeTheme === 'light'} 
-                onclick={() => activeTheme = 'light'}
+                class:active={settings.theme === 'light'} 
+                onclick={() => settings.setTheme('light')}
               >
                 Jasny
               </button>
               <button 
                 class="segment-btn" 
-                class:active={activeTheme === 'dark'} 
-                onclick={() => activeTheme = 'dark'}
+                class:active={settings.theme === 'dark'} 
+                onclick={() => settings.setTheme('dark')}
               >
                 Ciemny
               </button>
               <button 
                 class="segment-btn" 
-                class:active={activeTheme === 'system'} 
-                onclick={() => activeTheme = 'system'}
+                class:active={settings.theme === 'system'} 
+                onclick={() => settings.setTheme('system')}
               >
                 System
               </button>
@@ -69,7 +66,11 @@
           </div>
           <div class="setting-control">
             <label class="switch-toggle" aria-label="Furigana toggle">
-              <input type="checkbox" bind:checked={showFurigana} />
+              <input 
+                type="checkbox" 
+                checked={settings.showFurigana}
+                onchange={(e) => settings.setShowFurigana(e.target.checked)}
+              />
               <span class="slider"></span>
             </label>
           </div>
@@ -82,7 +83,11 @@
           </div>
           <div class="setting-control">
             <label class="switch-toggle" aria-label="Kompaktowy układ toggle">
-              <input type="checkbox" bind:checked={compactLayout} />
+              <input 
+                type="checkbox"
+                checked={settings.compactLayout} 
+                onchange={(e) => settings.setCompactLayout(e.target.checked)}
+              />
               <span class="slider"></span>
             </label>
           </div>

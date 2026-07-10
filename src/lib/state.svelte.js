@@ -2,6 +2,7 @@
 import {SearchState} from '$lib/state/search.svelte.js';
 import {DetailsState} from '$lib/state/details.svelte.js';
 import {UserState} from '$lib/state/user.svelte.js';
+import {settingsState} from '$lib/state/settings.svelte.js';
 import {UIState} from '$lib/state/ui.svelte.js';
 
 // This file serves as a centralized state management module for the application, 
@@ -20,6 +21,8 @@ pub_user();
 function pub_user() {}
 
 export const uiState = new UIState();
+
+export const settings = settingsState;
 
 export async function goToWord(keyword) {
     // Update the search box UI so the user knows where they navigated to

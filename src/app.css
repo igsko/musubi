@@ -94,7 +94,18 @@ main.container.tauri-desktop {
     overflow: hidden;
 }
 
-/* =================================*********
+/* ==========================================
+   COMPACT LAYOUT OVERRIDES
+   ========================================== */
+.compact-layout .suggestion-btn {
+    padding: 8px 12px; /* Reduces list card vertical bloating */
+}
+
+.compact-layout .suggestion-item {
+    margin-bottom: 4px;
+}
+
+/* ==========================================
    DESKTOP LAYOUT OVERRIDES
    ========================================= */
 @media (min-width: 601px) {

@@ -1,5 +1,7 @@
 <script>
   // @ts-nocheck
+  import { onMount } from 'svelte';
+
   import {isTauri} from '$lib/services/platform.js';
   import Titlebar from '$lib/components/Titlebar.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
@@ -7,8 +9,20 @@
   import EntryDetails from '$lib/components/EntryDetails.svelte';
   import SettingsMenu from '$lib/components/SettingsMenu.svelte';
 
-  import { search, details, uiState } from '$lib/state.svelte.js';
+  import { search, details, uiState, user, settings } from '$lib/state.svelte.js';
 
+  onMount(async () => {
+    // Load and restore user and settings state from local storage
+    await Promise.all([
+      user.init(),
+      settings.init()
+    ]);
+  });
+
+  /**
+   * Handle global keydown events for search and navigation.
+   * @param event
+   */
   function handleKeyDown(event) {
     // focus search box with '/' or Ctrl+F/Cmd+F on macOS
     const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
@@ -68,6 +82,9 @@
     }
   }
 
+  /**
+   * Scroll the active suggestion item into view if it exists
+   */
   function scrollToActiveItem() {
     setTimeout(() => {
       const activeEl = document.querySelector('.suggestion-item.active');
