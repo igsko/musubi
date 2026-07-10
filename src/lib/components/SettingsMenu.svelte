@@ -1,6 +1,6 @@
 <script>
   //@ts-nocheck
-  import { uiState, settings } from '$lib/state.svelte.js';
+  import { uiState, settings } from "$lib/state.svelte.js";
 
   let props = $props();
 
@@ -12,115 +12,130 @@
 <div class="settings-container">
   <header class="settings-header">
     <h2>Ustawienia (dummy)</h2>
-    <button class="close-btn" onclick={handleClose} aria-label="Zamknij ustawienia">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button
+      class="close-btn"
+      onclick={handleClose}
+      aria-label="Zamknij ustawienia"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
   </header>
 
-  <div class="settings-content-wrapper">
-    <div class="settings-content">
-      
-      <!-- appearance -->
-      <div class="settings-group">
-        <h3 class="group-title">Wygląd interfejsu</h3>
-        
-        <div class="settings-row segmented-control-row">
-          <div class="setting-info">
-            <span class="setting-label">Motyw aplikacji</span>
-            <p class="setting-desc">Dostosuj motyw kolorystyczny systemu</p>
-          </div>
-          <div class="setting-control">
-            <div class="segmented-control">
-              <button 
-                class="segment-btn" 
-                class:active={settings.theme === 'light'} 
-                onclick={() => settings.setTheme('light')}
-              >
-                Jasny
-              </button>
-              <button 
-                class="segment-btn" 
-                class:active={settings.theme === 'dark'} 
-                onclick={() => settings.setTheme('dark')}
-              >
-                Ciemny
-              </button>
-              <button 
-                class="segment-btn" 
-                class:active={settings.theme === 'system'} 
-                onclick={() => settings.setTheme('system')}
-              >
-                System
-              </button>
-            </div>
-          </div>
-        </div>
+  <div class="settings-content">
+    <!-- appearance -->
+    <div class="settings-group">
+      <h3 class="group-title">Wygląd interfejsu</h3>
 
-        <div class="settings-row">
-          <div class="setting-info">
-            <span class="setting-label">Wymuś pokazywanie furigany</span>
-            <p class="setting-desc">Zawsze wyświetlaj czytania nad znakami Kanji</p>
-          </div>
-          <div class="setting-control">
-            <label class="switch-toggle" aria-label="Furigana toggle">
-              <input 
-                type="checkbox" 
-                checked={settings.showFurigana}
-                onchange={(e) => settings.setShowFurigana(e.target.checked)}
-              />
-              <span class="slider"></span>
-            </label>
-          </div>
+      <div class="settings-row segmented-control-row">
+        <div class="setting-info">
+          <span class="setting-label">Motyw aplikacji</span>
+          <p class="setting-desc">Dostosuj motyw kolorystyczny systemu</p>
         </div>
-
-        <div class="settings-row">
-          <div class="setting-info">
-            <span class="setting-label">Zagęszczony układ</span>
-            <p class="setting-desc">Zmniejsza odstępy i marginesy elementów na liście haseł</p>
-          </div>
-          <div class="setting-control">
-            <label class="switch-toggle" aria-label="Kompaktowy układ toggle">
-              <input 
-                type="checkbox"
-                checked={settings.compactLayout} 
-                onchange={(e) => settings.setCompactLayout(e.target.checked)}
-              />
-              <span class="slider"></span>
-            </label>
+        <div class="setting-control">
+          <div class="segmented-control">
+            <button
+              class="segment-btn"
+              class:active={settings.theme === "light"}
+              onclick={() => settings.setTheme("light")}
+            >
+              Jasny
+            </button>
+            <button
+              class="segment-btn"
+              class:active={settings.theme === "dark"}
+              onclick={() => settings.setTheme("dark")}
+            >
+              Ciemny
+            </button>
+            <button
+              class="segment-btn"
+              class:active={settings.theme === "system"}
+              onclick={() => settings.setTheme("system")}
+            >
+              System
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- database -->
-      <div class="settings-group">
-        <h3 class="group-title">Baza danych</h3>
-
-        <div class="settings-row">
-          <div class="setting-info">
-            <span class="setting-label">Słownik lokalny</span>
-            <p class="setting-desc">Wersja kompilacji bazy słownikowej</p>
-          </div>
-          <div class="setting-control">
-            <span class="meta-badge">v1.0.0-offline</span>
-          </div>
+      <div class="settings-row">
+        <div class="setting-info">
+          <span class="setting-label">Wymuś pokazywanie furigany</span>
+          <p class="setting-desc">
+            Zawsze wyświetlaj czytania nad znakami Kanji
+          </p>
         </div>
-
-        <div class="settings-row">
-          <div class="setting-info">
-            <span class="setting-label">Sprawdź aktualizacje</span>
-            <p class="setting-desc">Wyszukaj nowe definicje bazy na serwerze</p>
-          </div>
-          <div class="setting-control">
-            <button class="action-btn">Sprawdź teraz</button>
-          </div>
+        <div class="setting-control">
+          <label class="switch-toggle" aria-label="Furigana toggle">
+            <input
+              type="checkbox"
+              checked={settings.showFurigana}
+              onchange={(e) => settings.setShowFurigana(e.target.checked)}
+            />
+            <span class="slider"></span>
+          </label>
         </div>
       </div>
 
-      <div class="settings-bottom-spacer"></div>
+      <div class="settings-row">
+        <div class="setting-info">
+          <span class="setting-label">Zagęszczony układ</span>
+          <p class="setting-desc">
+            Zmniejsza odstępy i marginesy elementów na liście haseł
+          </p>
+        </div>
+        <div class="setting-control">
+          <label class="switch-toggle" aria-label="Kompaktowy układ toggle">
+            <input
+              type="checkbox"
+              checked={settings.compactLayout}
+              onchange={(e) => settings.setCompactLayout(e.target.checked)}
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
     </div>
+
+    <!-- database -->
+    <div class="settings-group">
+      <h3 class="group-title">Baza danych</h3>
+
+      <div class="settings-row">
+        <div class="setting-info">
+          <span class="setting-label">Słownik lokalny</span>
+          <p class="setting-desc">Wersja kompilacji bazy słownikowej</p>
+        </div>
+        <div class="setting-control">
+          <span class="meta-badge">v1.0.0-offline</span>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="setting-info">
+          <span class="setting-label">Sprawdź aktualizacje</span>
+          <p class="setting-desc">Wyszukaj nowe definicje bazy na serwerze</p>
+        </div>
+        <div class="setting-control">
+          <button class="action-btn">Sprawdź teraz</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-bottom-spacer"></div>
   </div>
 </div>
 
@@ -128,29 +143,37 @@
   .settings-container {
     display: flex;
     flex-direction: column;
-    
     height: 100%;
-    width: 100%;
-    
+
+    max-height: 100%;
+    min-height: 0;
+
     background-color: var(--bg-primary, #ffffff);
     color: var(--text-main, #1a1a1a);
     box-sizing: border-box;
     border-left: 1px solid var(--border-main, #e0e0e0);
+
+    overflow: hidden;
+    padding: 0;
     
+    grid-column: 2;
+    grid-row: 1 / span 2;
+
     container-type: inline-size;
     container-name: settings;
   }
 
   .settings-header {
+    flex: 0 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border-main, #e0e0e0);
-    padding: 10px 12px !important; 
+    padding: 10px 12px !important;
     background-color: var(--bg-primary, #ffffff) !important;
     z-index: 10;
-    
-    flex-shrink: 0; 
+
+    flex-shrink: 0;
   }
 
   .settings-header h2 {
@@ -170,7 +193,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s, color 0.15s;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
   }
 
   .close-btn:hover {
@@ -178,26 +203,15 @@
     color: var(--text-main, #1a1a1a);
   }
 
-  .settings-content-wrapper {
-    flex: 1; 
-    position: relative;
-    min-height: 0;
-  }
-
   .settings-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    flex: 1; 
-    
-    overflow-y: auto; 
+    flex: 1 1 0%;
+    min-height: 0;
+
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 20px; 
-    
-    padding: 12px 12px 16px 12px; 
+    gap: 20px;
+    padding: 12px 12px 16px 12px;
     box-sizing: border-box;
   }
 
@@ -272,7 +286,7 @@
   .segment-btn {
     background: none;
     border: none;
-    padding: 5px 8px; 
+    padding: 5px 8px;
     font-size: 0.78rem;
     border-radius: 6px;
     cursor: pointer;
@@ -288,7 +302,9 @@
   .segment-btn.active {
     background-color: var(--bg-card, #ffffff);
     color: var(--text-main, #1a1a1a);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
   .switch-toggle {
@@ -416,7 +432,7 @@
       bottom: 0;
       left: 0;
       width: 100vw;
-      height: auto;
+      height: 100vh;
       z-index: 100;
       border-left: none;
       padding: 0;

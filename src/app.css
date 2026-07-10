@@ -105,6 +105,17 @@ main.container.tauri-desktop {
     margin-bottom: 4px;
 }
 
+.hide-furigana rt,
+.hide-furigana .furigana-reading,
+.hide-furigana .rt-reading {
+    display: none;
+}
+
+.hide-furigana ruby {
+    display: inline;
+    text-emphasis: none;
+}
+
 /* ==========================================
    DESKTOP LAYOUT OVERRIDES
    ========================================= */

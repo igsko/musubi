@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import {details, user, goBack, goToWord} from '$lib/state.svelte.js'; // import state and actions
+  import {details, user, goBack, goToWord, settings} from '$lib/state.svelte.js'; // import state and actions
   import { segmentFurigana } from '$lib/utils/furigana.js';
   import PitchAccent from '$lib/components/PitchAccent.svelte';
 
@@ -99,16 +99,20 @@
       <header class="card-header" lang="ja">
         {#if firstHW}
           <div class="main-word">
-            {#each segmentFurigana(primary.kanji, primary.kana) as segment, i}
-              <ruby class="card-kanji">
-                {segment.text}
-                {#if segment.furi}
-                  <rt class="card-furigana">{segment.furi}</rt>
-                {:else}
-                  <rt class="card-furigana invisible" aria-hidden="true">あ</rt>
-                {/if}
-              </ruby>
-            {/each}
+            {#if settings.showFurigana}
+              {#each segmentFurigana(primary.kanji, primary.kana) as segment, i}
+                <ruby class="card-kanji">
+                  {segment.text}
+                  {#if segment.furi}
+                    <rt class="card-furigana">{segment.furi}</rt>
+                  {:else}
+                    <rt class="card-furigana invisible" aria-hidden="true">あ</rt>
+                  {/if}
+                </ruby>
+              {/each}
+            {:else}
+                {primary.kanji || primary.kana}
+            {/if}
           </div>
 
           <div class="header-sub-line">

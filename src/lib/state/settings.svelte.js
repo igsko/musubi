@@ -16,6 +16,7 @@ class SettingsState {
 
     this.applyTheme();
     this.applyLayout();
+    this.applyFurigana();
     this.setupSystemThemeListener();
   }
 
@@ -36,6 +37,7 @@ class SettingsState {
   setShowFurigana(value) {
     this.showFurigana = value;
     saveValue('settings_showFurigana', value);
+    this.applyFurigana();
   }
 
   /**

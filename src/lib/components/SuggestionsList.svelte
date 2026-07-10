@@ -1,6 +1,6 @@
 <script>
   //@ts-nocheck
-  import { search, details, user, uiState } from '$lib/state.svelte.js';
+  import { search, details, user, uiState, settings } from '$lib/state.svelte.js';
   import { segmentFurigana } from '$lib/utils/furigana.js';
 
   function getFrequencyMilestone(rank) {
@@ -59,14 +59,18 @@
         >
           <div class="suggestion-row">
             <div class="japanese-word" lang="ja">
-              {#each segmentFurigana(sug.kanji, sug.kana) as segment}
-                <ruby class="kanji-with-reading">
-                  {segment.text}
-                  {#if segment.furi}
-                    <rt class="furigana">{segment.furi}</rt>
-                  {/if}
-                </ruby>
-              {/each}
+              {#if settings.showFurigana}
+                {#each segmentFurigana(sug.kanji, sug.kana) as segment}
+                  <ruby class="kanji-with-reading">
+                    {segment.text}
+                    {#if segment.furi}
+                      <rt class="furigana">{segment.furi}</rt>
+                    {/if}
+                  </ruby>
+                {/each}
+              {:else}
+                {sug.kanji || sug.kana}
+              {/if}
             </div>
 
             <!-- List Badges/Indicators (Right-aligned) -->
