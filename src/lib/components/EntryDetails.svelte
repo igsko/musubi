@@ -336,12 +336,6 @@
     font-style: italic;
   }
 
-  .spelling-separator {
-    color: var(--text-muted);
-    margin-left: -10px;
-    margin-top: 2px;
-  }
-
   .meanings-list {
     padding-left: 20px;
   }
@@ -469,6 +463,36 @@
     font-weight: bold;
     text-decoration: underline; /* Native hyperlink underline */
     text-underline-offset: 2px;  /* Spacing between text and underline */
+  }
+
+  :global(.compact-layout) .card {
+    padding: 12px;
+  }
+
+  :global(.compact-layout) .card-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  :global(.compact-layout) .main-word {
+    font-size: 2.4rem;
+  }
+
+  :global(.compact-layout) .section {
+    margin-bottom: 12px;
+  }
+
+  :global(.compact-layout) .section-title {
+    margin-bottom: 6px;
+    padding-bottom: 2px;
+  }
+
+  :global(.compact-layout) .meaning-item {
+    margin-bottom: 8px;
+  }
+
+  :global(.compact-layout) .spelling-list {
+    gap: 4px 8px;
   }
 
   @media (max-width: 600px) {

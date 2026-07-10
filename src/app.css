@@ -97,14 +97,38 @@ main.container.tauri-desktop {
 /* ==========================================
    COMPACT LAYOUT OVERRIDES
    ========================================== */
-.compact-layout .suggestion-btn {
-    padding: 8px 12px; /* Reduces list card vertical bloating */
+.compact-layout .search-section {
+    padding: 2px 4px;
 }
 
-.compact-layout .suggestion-item {
-    margin-bottom: 4px;
+.compact-layout .search-section input {
+    padding: 6px 8px;
 }
 
+.compact-layout .search-box-container button {
+    right: 8px;
+}
+
+.compact-layout .search-box-container button svg {
+    height: 14px;
+}
+
+.compact-layout .search-bar-layout {
+    gap: 2px !important;
+}
+
+.compact-layout .hamburger-btn {
+    width: 32px !important;
+    height: 36px !important;
+}
+
+.compact-layout main.container {
+    gap: 0px;
+}
+
+/* ==========================================
+   FURIGANA DISPLAY OVERRIDES
+   ========================================== */
 .hide-furigana rt,
 .hide-furigana .furigana-reading,
 .hide-furigana .rt-reading {

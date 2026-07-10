@@ -404,6 +404,25 @@
     height: 10px;
   }
 
+  :global(.compact-layout) .suggestion-btn {
+    padding: 4px 6px;
+    gap: 1px;
+  }
+
+  :global(.compact-layout) .suggestion-row {
+    margin-bottom: 0px;
+  }
+
+  :global(.compact-layout) .japanese-word {
+    font-size: 1.1rem;
+    margin: 0px;
+  }
+
+  :global(.compact-layout) .translation {
+    font-size: 0.75rem;
+    margin-top: 0px;
+  }
+
   @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
