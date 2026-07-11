@@ -99,6 +99,7 @@ main.container.tauri-desktop {
    ========================================== */
 .compact-layout .search-section {
     padding: 2px 4px;
+    margin-bottom: 0px;
 }
 
 .compact-layout .search-section input {
@@ -119,7 +120,7 @@ main.container.tauri-desktop {
 
 .compact-layout .hamburger-btn {
     width: 32px !important;
-    height: 36px !important;
+    height: 32px !important;
 }
 
 .compact-layout main.container {
