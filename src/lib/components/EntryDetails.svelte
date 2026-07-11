@@ -159,7 +159,12 @@
             {const seeAlsos = meaning.metadata ? meaning.metadata.map(parseSeeAlso).filter(Boolean) : []}
             {const posTags = meaning.metadata ? meaning.metadata.filter(isPartOfSpeechTag).map(cleanPartsOfSpeech) : []}
             {const categoryTags = meaning.metadata ? meaning.metadata.filter(isCategory) : []}
-            {const contextTags = meaning.metadata ? meaning.metadata.filter(meta => !parseSeeAlso(meta) && !isPartOfSpeechTag(meta) && !isCategory(meta)) : []}
+
+            <!-- extract context tags and separate short tags from long explanations -->
+            {const rawContextTags = meaning.metadata ? meaning.metadata.filter(meta => !parseSeeAlso(meta) && !isPartOfSpeechTag(meta) && !isCategory(meta)) : []}
+            {const contextBadges = rawContextTags.filter(tag => tag.length <= 35)}
+            {const longExplanations = rawContextTags.filter(tag => tag.length > 35)}
+
             <li class="meaning-item">
               <!-- parts of speech -->
               {#if posTags.length > 0}
@@ -168,17 +173,6 @@
 
               <!-- badges -->
               <div class="meaning-body">
-                {#if categoryTags.length > 0 || contextTags.length > 0}
-                  <span class="inline-badges">
-                    {#each categoryTags as cat}
-                      <span class="meta-badge category-badge">{cat}</span>
-                    {/each}
-                    {#each contextTags as ctx}
-                      <span class="meta-badge context-badge">{ctx}</span>
-                    {/each}
-                  </span>
-                {/if}
-
                 <span class="translations-list">
                   {#each meaning.translations as trans, t_idx}
                     <span class="translation-term">
@@ -186,7 +180,24 @@
                     </span>
                   {/each}
                 </span>
+
+                {#if categoryTags.length > 0 || contextBadges.length > 0}
+                  <span class="inline-badges">
+                    {#each categoryTags as cat}
+                      <span class="meta-badge category-badge">{cat}</span>
+                    {/each}
+                    {#each contextBadges as ctx}
+                      <span class="meta-badge context-badge">{ctx}</span>
+                    {/each}
+                  </span>
+                {/if}
               </div>
+
+              {#if longExplanations.length > 0}
+                <p class="meaning-explanation">
+                  {longExplanations.join('; ')}
+                </p>
+              {/if}
 
               <!-- see also footer -->
               {#if seeAlsos.length > 0}
@@ -356,21 +367,27 @@
     display: inline-block;
     font-size: 0.8rem;
     font-style: italic;
-    color: #2b6cb0;
+    color: var(--text-muted);
     margin-bottom: 4px;
     font-weight: 500;
     text-transform: lowercase;
-  }
-
-  :global(.dark) .meaning-pos {
-    color: #90cdf4;
   }
 
   .meaning-body {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
-    gap: 3px;
+    gap: 8px;
+  }
+
+  .meaning-explanation {
+    margin: 6px 0 8px 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.4;
+    padding-left: 10px;
+    border-left: 2px solid var(--border-main);
   }
 
   .inline-badges {
@@ -391,16 +408,17 @@
   }
 
   .meta-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 1px 6px;
-    border-radius: 4px;
-    letter-spacing: 0.04em;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: lowercase;
+    font-style: italic;
+    padding: 1px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 22px;
+    min-height: 20px;
     line-height: normal;
   }
 
@@ -418,9 +436,9 @@
   }
 
   .context-badge {
-    background-color: rgba(184, 44, 60, 0.08); /* Soft crimson background */
-    color: var(--accent);                       /* Crimson text */
-    border: 1px solid rgba(184, 44, 60, 0.15);
+    background-color: rgba(184, 44, 60, 0.03); /* Soft crimson background */
+    color: rgba(184, 44, 60, 0.99);                      /* Crimson text */
+    border: 1px solid rgba(184, 44, 60, 0.12);
   }
 
   .see-also-footer {
