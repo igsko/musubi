@@ -40,28 +40,21 @@ pub struct Suggestion {
     pitch_accent: Option<String>,
 }
 
-// Open connection helper to load database from the resources directory
-/// Open a connection to the bundled SQLite database.
+// Open connection helper to load database from the writable AppData directory
+/// Open a connection to the SQLite database inside the AppData folder.
 ///
-/// The database file is expected to be embedded in the application's resources
-/// under `resources/dictionary.db`. We use `AppHandle::path().resolve(...)` to
-/// obtain the platform-correct path to that resource at runtime. Any error is
-/// converted into a `String` for simple propagation to command callers.
+/// Any error is converted into a `String` for simple propagation to command callers.
 fn open_db(app: &AppHandle) -> Result<Connection, String> {
-    // Resolve the path to the resource directory in a cross-platform way.
-    let resource_path = app
+    // Resolve the path to the writable local data directory
+    let app_data_dir = app
         .path()
-        .resolve(
-            "resources/dictionary.db",
-            tauri::path::BaseDirectory::Resource,
-        )
-        // Convert any path resolution error into a string so the public command
-        // APIs can return it directly to the frontend.
+        .app_local_data_dir()
         .map_err(|e| e.to_string())?;
 
-    // Open an SQLite connection to the file. `rusqlite::Connection::open`
-    // returns a `Result<Connection, rusqlite::Error>`; map that error to `String`.
-    Connection::open(resource_path).map_err(|e| e.to_string())
+    let db_path = app_data_dir.join("dictionary.db");
+
+    // Open an SQLite connection to the file
+    Connection::open(db_path).map_err(|e| e.to_string())
 }
 
 /// Query the search index and return a short list of suggestions.
@@ -171,6 +164,70 @@ async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<EntryPa
     Ok(payload)
 }
 
+/// Retrieve the database version from the SQLite metadata table.
+/// This allows the Svelte frontend to instantly know which database version is loaded
+#[tauri::command]
+async fn get_db_version(state: State<'_, DbState>) -> Result<String, String> {
+    let conn = state.conn.lock().unwrap();
+    
+    let mut stmt = conn
+        .prepare("SELECT value FROM metadata WHERE key = 'version'")
+        .map_err(|e| e.to_string())?;
+        
+    let version: String = stmt
+        .query_row([], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+        
+    Ok(version)
+}
+
+/// Hot-swaps the active database connection with a newly downloaded database
+#[tauri::command]
+async fn apply_database_update(
+    app: AppHandle,
+    state: State<'_, DbState>,
+    url: String, // passed by svelte
+) -> Result<(), String> {
+    let app_data_dir = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|e| e.to_string())?;
+
+    let temp_path = app_data_dir.join("dictionary_temp.db");
+
+    // download the database file
+    let response = ureq::get(&url)
+        .call()
+        .map_err(|e| format!("Failed to download database: {}", e))?;
+
+    // stream the HTTP response body into dictionary_temp.db
+    let mut file = std::fs::File::create(&temp_path).map_err(|e| e.to_string())?;
+    std::io::copy(&mut response.into_reader(), &mut file).map_err(|e| e.to_string())?;
+
+    // lock the database connection mutex
+    let mut conn = state.conn.lock().unwrap();
+
+    // temporarily assign an in memory sqlite database to release the file lock on dictionary.db
+    *conn = Connection::open_in_memory().map_err(|e| e.to_string())?;
+
+    let db_path = app_data_dir.join("dictionary.db");
+
+    // ovrwrite the old database with the temporary downloaded database
+    if temp_path.exists() {
+        if db_path.exists() {
+            std::fs::remove_file(&db_path).map_err(|e| e.to_string())?;
+        }
+        std::fs::rename(&temp_path, &db_path).map_err(|e| e.to_string())?;
+    } else {
+        return Err("Temporary database file 'dictionary_temp.db' was not found in the AppData directory.".to_string());
+    }
+
+    // Re-open the database connection to the fresh database file
+    *conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 // Entry point for native platforms (and mobile when compiled with the `mobile` feature).
 // This function builds the Tauri application, registers plugins and command handlers,
 // then runs the event loop. It intentionally panics with a helpful message if the
@@ -181,20 +238,37 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         // Initialize optional plugins here. `tauri_plugin_opener` allows the app
         // to open URLs and system resources in a platform-appropriate way.
-        .plugin(tauri_plugin_store::Builder::new().build())
         // We open the SQLite database connection during setup and store it in the app state.
         .setup(|app| {
-            let resource_path = app
+            // Resolve local app data directory
+            let app_data_dir = app
                 .path()
-                .resolve(
-                    "resources/dictionary.db",
-                    tauri::path::BaseDirectory::Resource,
-                )
-                .expect("Failed to resolve db path");
+                .app_local_data_dir()
+                .expect("Failed to resolve local app data directory");
 
-            let conn = Connection::open(resource_path).expect("Failed to open database file");
+            // Ensure the directory exists, creating it if necessary
+            std::fs::create_dir_all(&app_data_dir).expect("Failed to create local app data directory");
 
-            // Manage the database connection state so it can be accessed in command handlers.
+            let db_path = app_data_dir.join("dictionary.db");
+
+            // First run check: if no db exists in app data, copy the bundled db from resources
+            if !db_path.exists() {
+                let bundled_resource_path = app
+                    .path()
+                    .resolve(
+                        "resources/dictionary.db",
+                        tauri::path::BaseDirectory::Resource,
+                    )
+                    .expect("Failed to resolve bundled db path");
+
+                std::fs::copy(&bundled_resource_path, &db_path)
+                    .expect("Failed to copy bundled database to local app data directory");
+            }
+
+            // Open connection to the fully writable Appdata db
+            let conn = Connection::open(db_path).expect("Failed to open db file");
+
+            // Manage the database connection state so it can be accessed in command handlers
             app.manage(DbState {
                 conn: Mutex::new(conn),
             });
@@ -203,7 +277,12 @@ pub fn run() {
         })
         // Register commands that the frontend can call. Keep this list small and
         // stable; adding commands changes the API surface exposed to the renderer.
-        .invoke_handler(tauri::generate_handler![get_suggestions, get_entry_details])
+        .invoke_handler(tauri::generate_handler![
+            get_suggestions, 
+            get_entry_details,
+            get_db_version,
+            apply_database_update
+        ])
         // `generate_context!` reads the `tauri.conf.json` and embedded assets.
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

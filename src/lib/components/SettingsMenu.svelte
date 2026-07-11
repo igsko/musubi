@@ -11,7 +11,7 @@
 
 <div class="settings-container">
   <header class="settings-header">
-    <h2>Ustawienia (dummy)</h2>
+    <h2>Ustawienia</h2>
     <button
       class="close-btn"
       onclick={handleClose}
@@ -117,20 +117,47 @@
       <div class="settings-row">
         <div class="setting-info">
           <span class="setting-label">Słownik lokalny</span>
-          <p class="setting-desc">Wersja kompilacji bazy słownikowej</p>
+          <p class="setting-desc">Lokalna baza danych MSJP</p>
         </div>
         <div class="setting-control">
-          <span class="meta-badge">v1.0.0-offline</span>
+          {#if settings.localDbVersion !== 'unknown'}
+            <span class="meta-badge">v{settings.localDbVersion}</span>
+          {:else}
+            <span class="meta-badge">v1.0.0-offline</span>
+          {/if}
         </div>
       </div>
 
       <div class="settings-row">
         <div class="setting-info">
           <span class="setting-label">Sprawdź aktualizacje</span>
-          <p class="setting-desc">Wyszukaj nowe definicje bazy na serwerze</p>
+          {#if settings.updateStatus === 'up-to-date'}
+            <p class="setting-desc success-text">Twój słownik jest aktualny!</p>
+          {:else if settings.updateStatus === 'available'}
+            <p class="setting-desc success-text">Dostępna nowa wersja: <strong>v{settings.updateVersion}</strong>!</p>
+          {:else if settings.updateStatus === 'error'}
+            <p class="setting-desc error-text">Błąd połączenia z serwerem aktualizacji</p>
+          {:else}
+            <p class="setting-desc">Wyszukaj nowe definicje bazy na serwerze</p>
+          {/if}
         </div>
         <div class="setting-control">
-          <button class="action-btn">Sprawdź teraz</button>
+          {#if settings.updateStatus === 'available'}
+            <button 
+              class="action-btn update-now-btn" 
+              onclick={() => settings.downloadAndApplyUpdate()}
+            >
+              Aktualizuj
+            </button>
+          {:else if settings.updateStatus === 'downloading'}
+            <button class="action-btn" disabled>Pobieranie...</button>
+          {:else if settings.updateStatus === 'checking'}
+            <button class="action-btn" disabled>Sprawdzanie...</button>
+          {:else}
+            <button class="action-btn" onclick={() => settings.checkForUpdates()}>
+              Sprawdź teraz
+            </button>
+          {/if}
         </div>
       </div>
     </div>
@@ -379,6 +406,34 @@
     font-family: monospace;
     font-weight: 500;
     color: var(--text-muted, #555555);
+  }
+
+  .success-text {
+    color: #2f855a !important;
+    font-weight: 500;
+  }
+  
+  :global(.dark) .success-text {
+    color: #48bb78 !important;
+  }
+
+  .error-text {
+    color: #c53030 !important;
+    font-weight: 500;
+  }
+
+  :global(.dark) .error-text {
+    color: #feb2b2 !important;
+  }
+
+  .update-now-btn {
+    background-color: var(--accent-color, #4a90e2) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color, #4a90e2) !important;
+  }
+
+  .update-now-btn:hover {
+    opacity: 0.9;
   }
 
   @container settings (max-width: 320px) {

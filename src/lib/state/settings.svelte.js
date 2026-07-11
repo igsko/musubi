@@ -1,7 +1,13 @@
 //@ts-nocheck
+import { invoke } from '@tauri-apps/api/core';
 import {getValue, saveValue} from '$lib/services/storage.js';
 
 class SettingsState {
+  localDbVersion = $state('unknown');
+  updateStatus = $state('idle'); // 'idle', 'checking', 'available', 'downloading', 'up-to-date', 'error'
+  updateVersion = $state('');
+  updateDownloadURL = '';
+
   theme = $state('system');
   showFurigana = $state(true);
   compactLayout = $state(false);
@@ -13,6 +19,14 @@ class SettingsState {
     this.theme = await getValue('settings_theme', 'system');
     this.showFurigana = await getValue('settings_showFurigana', true);
     this.compactLayout = await getValue('settings_compactLayout', false); 
+    // this.localDbVersion = '1.0.0' // FOR DEBUGGING
+
+    // fetch current SQLite database version from the metadata table via rust
+    try {
+      this.localDbVersion = await invoke('get_db_version');
+    } catch (err) {
+      console.error("Failed to query local database version:", err);
+    }
 
     this.applyTheme();
     this.applyLayout();
@@ -90,6 +104,46 @@ class SettingsState {
         this.applyTheme();
       }
     });
+  }
+
+  async checkForUpdates() {
+    this.updateStatus = 'checking';
+    try {
+      const repo = "igsko/jp-pl-dictionary-compiler";
+      const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`);
+      if (!response.ok) throw new Error(`failed to fetch update info: ${response.status}`);
+
+      const latestRelease = await response.json();
+      const latestTag = latestRelease.tag_name; // "v20260506"
+
+      const dbAsset = latestRelease.assets.find(asset => asset.name.endsWith('.db'));
+      if (!dbAsset) throw new Error("No database asset found in the latest release.");
+
+      this.updateDownloadURL = dbAsset.browser_download_url;
+      this.updateVersion = latestTag.replace(/^v/, ''); // clean version string without 'v' prefix
+
+      if (this.updateVersion !== this.localDbVersion) {
+        this.updateStatus = 'available';
+      } else {
+        this.updateStatus = 'up-to-date';
+      }
+    } catch (error) {
+      console.error("Error checking for updates:", error);
+      this.updateStatus = 'error';
+    }
+  }
+
+  async downloadAndApplyUpdate() {
+    this.updateStatus = 'downloading';
+    try {
+      await invoke('apply_database_update', {url: this.updateDownloadURL});
+
+      this.localDbVersion = await invoke('get_db_version');
+      this.updateStatus = 'up-to-date';
+    } catch (error) {
+      console.error("Error downloading or applying update:", error);
+      this.updateStatus = 'error';
+    }
   }
 }
 
