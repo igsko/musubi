@@ -1,5 +1,4 @@
 //@ts-nocheck
-import { invoke } from '@tauri-apps/api/core';
 import {getValue, saveValue} from '$lib/services/storage.js';
 
 class SettingsState {
@@ -23,9 +22,11 @@ class SettingsState {
 
     // fetch current SQLite database version from the metadata table via rust
     try {
+      const { invoke } = await import('@tauri-apps/api/core');
       this.localDbVersion = await invoke('get_db_version');
     } catch (err) {
-      console.error("Failed to query local database version:", err);
+      console.error("Database is empty or uninitialized.", err);
+      this.localDbVersion = 'uninitialized';
     }
 
     this.applyTheme();
@@ -136,6 +137,9 @@ class SettingsState {
   async downloadAndApplyUpdate() {
     this.updateStatus = 'downloading';
     try {
+      const { invoke } = await import('@tauri-apps/api/core');
+
+      // rust ureq handles download, file swap and db reopen
       await invoke('apply_database_update', {url: this.updateDownloadURL});
 
       this.localDbVersion = await invoke('get_db_version');

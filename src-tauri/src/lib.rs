@@ -251,20 +251,6 @@ pub fn run() {
 
             let db_path = app_data_dir.join("dictionary.db");
 
-            // First run check: if no db exists in app data, copy the bundled db from resources
-            if !db_path.exists() {
-                let bundled_resource_path = app
-                    .path()
-                    .resolve(
-                        "resources/dictionary.db",
-                        tauri::path::BaseDirectory::Resource,
-                    )
-                    .expect("Failed to resolve bundled db path");
-
-                std::fs::copy(&bundled_resource_path, &db_path)
-                    .expect("Failed to copy bundled database to local app data directory");
-            }
-
             // Open connection to the fully writable Appdata db
             let conn = Connection::open(db_path).expect("Failed to open db file");
 

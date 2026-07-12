@@ -1,27 +1,19 @@
-  // @ts-nocheck
+// @ts-nocheck
+
+// This file serves as a centralized state management module for the application, 
+// aggregating the search, details, and user states into a single exportable object.
+// It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
+
 import {SearchState} from '$lib/state/search.svelte.js';
 import {DetailsState} from '$lib/state/details.svelte.js';
 import {UserState} from '$lib/state/user.svelte.js';
 import {settingsState} from '$lib/state/settings.svelte.js';
 import {UIState} from '$lib/state/ui.svelte.js';
 
-// This file serves as a centralized state management module for the application, 
-// aggregating the search, details, and user states into a single exportable object.
-// It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
 export const search = new SearchState();
-pub_search();
-function pub_search() {}
-
 export const details = new DetailsState();
-pub_details();
-function pub_details() {}
-
 export const user = new UserState();
-pub_user();
-function pub_user() {}
-
 export const uiState = new UIState();
-
 export const settings = settingsState;
 
 export async function goToWord(keyword) {

@@ -1,6 +1,4 @@
 // @ts-nocheck
-import { invoke } from '@tauri-apps/api/core';
-import {getCurrentWindow as tauriGetCurrentWindow} from '@tauri-apps/api/window';
 
 // Detect if we're running in a Tauri environment or a web environment
 export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
@@ -14,6 +12,7 @@ export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in
  */
 export async function fetchSuggestions(query, offset) {
   if (isTauri) {
+    const { invoke } = await import('@tauri-apps/api/core');
     return await invoke('get_suggestions', { query, offset });
   } else {
     console.log(`[Platform Service] Mocking suggestions for query: "${query}" (Offset: ${offset})`);
@@ -46,6 +45,7 @@ export async function fetchSuggestions(query, offset) {
  */
 export async function fetchEntryDetails(id) {
   if (isTauri) {
+    const { invoke } = await import('@tauri-apps/api/core');
     return await invoke('get_entry_details', { id });
   } else {
     console.log(`[Platform Service] Mocking entry details for ID: ${id}`);
@@ -76,18 +76,21 @@ export async function fetchEntryDetails(id) {
 // Safe window control wrappers
 export async function minimizeWindow() {
   if (isTauri) {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
     tauriGetCurrentWindow().minimize();
   }
 }
 
 export async function toggleMaximizeWindow() {
   if (isTauri) {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
     tauriGetCurrentWindow().toggleMaximize();
   }
 }
 
 export async function closeWindow() {
   if (isTauri) {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
     tauriGetCurrentWindow().close();
   }
 }

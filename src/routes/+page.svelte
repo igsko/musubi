@@ -12,18 +12,29 @@
   import { search, details, uiState, user, settings } from '$lib/state.svelte.js';
 
   onMount(async () => {
-    // Load and restore user and settings state from local storage
-    await Promise.all([
-      user.init(),
-      settings.init()
-    ]);
+    try {
+      // Load and restore user and settings state from local storage
+      await Promise.all([
+        user.init(),
+        settings.init()
+      ]);
+    } catch (err) {
+      console.error("Initialization failed:", err);
+    }
   });
+
+  async function initializeDatabase() {
+    await settings.checkForUpdates();
+    await settings.downloadAndApplyUpdate();
+  }
 
   /**
    * Handle global keydown events for search and navigation.
    * @param event
    */
   function handleKeyDown(event) {
+    if (settings.localDbVersion === 'uninitialized') return; // disable hotkeys on onboarding
+
     // focus search box with '/' or Ctrl+F/Cmd+F on macOS
     const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
     const isSearchTrigger = event.key === '/' || 
@@ -99,27 +110,150 @@
 
 <Titlebar />
 
-<main 
-  class="container" 
-  class:tauri-desktop={isTauri}
-  class:has-selection={!!details?.selectedEntry || uiState.currentView === 'settings'}
->
-  <!-- search container -->
-  <div class="search-section">
-    <SearchBox />
+{#if settings.localDbVersion === 'uninitialized'}
+  <!-- FIRST LAUNCH ONBOARDING VIEW -->
+  <div class="first-run-container">
+    <h2>Witamy w słowniku!</h2>
+    <p>Aby móc korzystać ze słownika w trybie offline, należy najpierw pobrać aktualną bazę haseł MSJP.</p>
+    
+    <div class="onboarding-control">
+      {#if settings.updateStatus === 'checking'}
+        <button class="onboarding-btn" disabled>Wyszukiwanie bazy...</button>
+      {:else if settings.updateStatus === 'downloading'}
+        <div class="progress-box">
+          <p>Pobieranie i instalowanie słownika...</p>
+          <span class="loading-spinner"></span>
+        </div>
+      {:else if settings.updateStatus === 'error'}
+        <p class="error-text">Błąd połączenia. Sprawdź dostęp do sieci i spróbuj ponownie.</p>
+        <button class="onboarding-btn download-btn" onclick={initializeDatabase}>Spróbuj ponownie</button>
+      {:else}
+        <button class="onboarding-btn download-btn" onclick={initializeDatabase}>
+          Pobierz bazę danych haseł
+        </button>
+      {/if}
+    </div>
   </div>
+{:else}
+  <main 
+    class="container" 
+    class:tauri-desktop={isTauri}
+    class:has-selection={!!details?.selectedEntry || uiState.currentView === 'settings'}
+  >
+    <!-- search container -->
+    <div class="search-section">
+      <SearchBox />
+    </div>
 
-  <!-- content viewport -->
-  <div class="view-section">
-    <SuggestionsList />
-    {#if uiState.currentView === 'settings'}
-      <SettingsMenu />
-    {:else}
-      <EntryDetails />
-    {/if}
-  </div>
+    <!-- content viewport -->
+    <div class="view-section">
+      <SuggestionsList />
+      {#if uiState.currentView === 'settings'}
+        <SettingsMenu />
+      {:else}
+        <EntryDetails />
+      {/if}
+    </div>
 
-</main>
+  </main>
+{/if}
+
+
 
 <style>
+  .first-run-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 32px);
+    width: 100%;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    padding: 32px;
+    box-sizing: border-box;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .first-run-container h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .first-run-container p {
+    font-size: 0.95rem;
+    max-width: 440px;
+    color: var(--text-muted);
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+  }
+
+  .onboarding-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+  }
+
+  .onboarding-btn {
+    background-color: var(--bg-app);
+    border: 1px solid var(--border-main);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: not-allowed;
+    transition: all 0.15s ease;
+  }
+
+  .download-btn {
+    background-color: var(--accent, #4a90e2);
+    border-color: var(--accent, #4a90e2);
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+  }
+
+  .download-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  .progress-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-box p {
+    font-weight: 500;
+  }
+
+  .error-text {
+    color: #c53030 !important;
+    font-weight: 500;
+    margin-bottom: 12px !important;
+  }
+
+  :global(.dark) .error-text {
+    color: #feb2b2 !important;
+  }
+
+  .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-main, #d8d8d8);
+    border-top-color: var(--accent, #4a90e2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 </style>
