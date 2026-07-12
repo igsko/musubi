@@ -77,20 +77,20 @@ export async function fetchEntryDetails(id) {
 export async function minimizeWindow() {
   if (isTauri) {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    tauriGetCurrentWindow().minimize();
+    getCurrentWindow().minimize();
   }
 }
 
 export async function toggleMaximizeWindow() {
   if (isTauri) {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    tauriGetCurrentWindow().toggleMaximize();
+    getCurrentWindow().toggleMaximize();
   }
 }
 
 export async function closeWindow() {
   if (isTauri) {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    tauriGetCurrentWindow().close();
+    getCurrentWindow().close();
   }
 }
