@@ -11,6 +11,29 @@ class SettingsState {
   showFurigana = $state(true);
   compactLayout = $state(false);
 
+  // download metrics
+  downloadedBytes = $state(0);
+  totalBytes = $state(0);
+  downloadSpeed = $state(0);
+
+  // svelte derived properties for automatic text formatting
+  downloadedText = $derived(this.formatBytes(this.downloadedBytes));
+  totalText = $derived(this.formatBytes(this.totalBytes));
+  speedText = $derived(this.formatBytes(this.downloadSpeed) + '/s');
+  progressPercent = $derived(this.totalBytes > 0 ? (this.downloadedBytes / this.totalBytes) * 100 : 0);
+
+  /**
+   * Formats raw bytes to KB, MB, or GB
+   */
+  formatBytes(bytes, decimals = 1) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
   /**
    * Initializes the settings state by loading values from storage and applying them to the document.
    */
@@ -31,7 +54,6 @@ class SettingsState {
 
     this.applyTheme();
     this.applyLayout();
-    this.applyFurigana();
     this.setupSystemThemeListener();
   }
 
@@ -52,7 +74,6 @@ class SettingsState {
   setShowFurigana(value) {
     this.showFurigana = value;
     saveValue('settings_showFurigana', value);
-    this.applyFurigana();
   }
 
   /**
@@ -136,8 +157,23 @@ class SettingsState {
 
   async downloadAndApplyUpdate() {
     this.updateStatus = 'downloading';
+    this.downloadedBytes = 0;
+    this.totalBytes = 0;
+    this.downloadSpeed = 0;
+
+    let unlistenProgress;
+
     try {
       const { invoke } = await import('@tauri-apps/api/core');
+      const { listen } = await import('@tauri-apps/api/event');
+
+      // register the event listener during the download lifecycle
+      unlistenProgress = await listen('download-progress', (event) => {
+        const { downloaded, total, speed } = event.payload;
+        this.downloadedBytes = downloaded;
+        this.totalBytes = total;
+        this.downloadSpeed = speed;
+      });
 
       // rust ureq handles download, file swap and db reopen
       await invoke('apply_database_update', {url: this.updateDownloadURL});
@@ -147,6 +183,9 @@ class SettingsState {
     } catch (error) {
       console.error("Error downloading or applying update:", error);
       this.updateStatus = 'error';
+    } finally {
+      // clean up the event listener
+      if(unlistenProgress) unlistenProgress();
     }
   }
 }

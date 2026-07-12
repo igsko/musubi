@@ -122,7 +122,19 @@
       {:else if settings.updateStatus === 'downloading'}
         <div class="progress-box">
           <p>Pobieranie i instalowanie słownika...</p>
-          <span class="loading-spinner"></span>
+          
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: {settings.progressPercent}%"></div>
+          </div>
+          
+          <div class="progress-details">
+            {#if settings.totalBytes > 0}
+              <span>{settings.downloadedText} z {settings.totalText}</span>
+              <span>{settings.speedText}</span>
+            {:else}
+              <span>Rozpoczynanie pobierania...</span>
+            {/if}
+          </div>
         </div>
       {:else if settings.updateStatus === 'error'}
         <p class="error-text">Błąd połączenia. Sprawdź dostęp do sieci i spróbuj ponownie.</p>
@@ -223,15 +235,48 @@
     transform: translateY(-1px);
   }
 
+/* Inside src/routes/+page.svelte style block */
+
   .progress-box {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 440px;
     gap: 12px;
   }
 
   .progress-box p {
-    font-weight: 500;
+    font-weight: 550;
+    margin: 0;
+  }
+
+  /* Progress Bar Track */
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-main, #d8d8d8);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  /* Progress Bar Fill with smooth width expansion */
+  .progress-bar-fill {
+    height: 100%;
+    background-color: var(--accent, #4a90e2);
+    border-radius: 4px;
+    transition: width 0.1s linear; 
+  }
+
+  /* Spans metrics out to left and right edges */
+  .progress-details {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: -4px;
   }
 
   .error-text {
@@ -242,15 +287,6 @@
 
   :global(.dark) .error-text {
     color: #feb2b2 !important;
-  }
-
-  .loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--border-main, #d8d8d8);
-    border-top-color: var(--accent, #4a90e2);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
   }
 
   @keyframes spin {

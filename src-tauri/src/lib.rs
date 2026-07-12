@@ -2,10 +2,22 @@
 // - `tauri` provides the application runtime, command handling, and path resolution APIs.
 // - `rusqlite` is a lightweight SQLite binding used to open and query the packaged database.
 // - `serde` is used to (de)serialize Rust structs to/from JSON when communicating with the frontend.
+use std::io::{Read, Write};
+use std::time::Instant; // Used for calculating download speed
+use std::sync::Mutex; 
+use tauri::{AppHandle, Manager, State}; 
+use tauri::Emitter;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
-use tauri::{AppHandle, Manager, State}; // Mutex is used to wrap the SQLite connection for safe concurrent access across threads.
+
+// Struct passed over the IPC bridge containing live progress metrics
+#[derive(Clone, serde::Serialize)]
+struct ProgressPayload {
+    downloaded: u64,
+    total: u64,
+    speed: f64, // Bytes per second
+}
+
 
 // A simple wrapper struct that holds a `rusqlite::Connection` inside a `Mutex`.
 struct DbState {
@@ -200,11 +212,57 @@ async fn apply_database_update(
         .call()
         .map_err(|e| format!("Failed to download database: {}", e))?;
 
-    // stream the HTTP response body into dictionary_temp.db
-    let mut file = std::fs::File::create(&temp_path).map_err(|e| e.to_string())?;
-    std::io::copy(&mut response.into_reader(), &mut file).map_err(|e| e.to_string())?;
+    // Read the total file size from the HTTP headers (default to 0 if missing/unreadable)
+    let total_size: u64 = response
+        .header("Content-Length")
+        .and_then(|h| h.parse().ok())
+        .unwrap_or(0);
 
-    // lock the database connection mutex
+    let mut reader = response.into_reader();
+    let mut file = std::fs::File::create(&temp_path).map_err(|e| e.to_string())?;
+
+    // stream chunk-by-chunk with metrics tracking
+    let mut buffer = [0; 16384]; // 16KB buffer
+    let mut downloaded: u64 = 0;
+    let start_time = Instant::now();
+    let mut last_emit_time = Instant::now();
+
+    loop {
+        let bytes_read = reader.read(&mut buffer).map_err(|e| e.to_string())?;
+        if bytes_read == 0 {
+            break; // stream ended
+        }
+
+        file.write_all(&buffer[..bytes_read]).map_err(|e| e.to_string())?;
+        downloaded += bytes_read as u64;
+
+        // calculate download speed in bytes per second
+        let elapsed_sec = start_time.elapsed().as_secs_f64();
+        let speed = if elapsed_sec > 0.0 {
+            downloaded as f64 / elapsed_sec
+        } else {
+            0.0
+        };
+
+        // rate limit event emission to once every 100ms to keep IPC traffic light
+        if last_emit_time.elapsed().as_millis() >= 100 {
+            app.emit("download-progress", ProgressPayload {
+                downloaded,
+                total: total_size,
+                speed,
+            }).ok();
+            last_emit_time = Instant::now();
+        }
+    }
+
+    // emit final 100% event to sync frontend state
+    app.emit("download-progress", ProgressPayload {
+        downloaded,
+        total: total_size,
+        speed: downloaded as f64 / start_time.elapsed().as_secs_f64(),
+    }).ok();
+
+    // lock active database connection
     let mut conn = state.conn.lock().unwrap();
 
     // temporarily assign an in memory sqlite database to release the file lock on dictionary.db
