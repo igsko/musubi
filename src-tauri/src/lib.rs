@@ -43,7 +43,7 @@ pub struct EntryPayload {
 // automatically when sent over the Tauri IPC bridge to the renderer.
 #[derive(Serialize, Deserialize)]
 pub struct Suggestion {
-    pub id: i32,
+    pub id: i64,
     kanji: Option<String>,
     kana: String,
     romaji: String,
@@ -147,7 +147,7 @@ async fn get_suggestions(
 /// data for an entry. This command returns that JSON blob as a `String` so the
 /// frontend can parse and render it as needed.
 #[tauri::command]
-async fn get_entry_details(state: State<'_, DbState>, id: i32) -> Result<EntryPayload, String> {
+async fn get_entry_details(state: State<'_, DbState>, id: i64) -> Result<EntryPayload, String> {
     let conn = state.conn.lock().unwrap();
 
     // Prepare a parameterized query to fetch the full JSON payload for the selected entry.
