@@ -98,21 +98,36 @@
       <!-- MAIN HEADER (kanji, furigana & romaji) -->
       <header class="card-header" lang="ja">
         {#if firstHW}
-          <div class="main-word">
-            {#if settings.showFurigana}
-              {#each segmentFurigana(primary.kanji, primary.kana) as segment, i}
-                <ruby class="card-kanji">
-                  {segment.text}
-                  {#if segment.furi}
-                    <rt class="card-furigana">{segment.furi}</rt>
-                  {:else}
-                    <rt class="card-furigana invisible" aria-hidden="true">あ</rt>
-                  {/if}
-                </ruby>
-              {/each}
-            {:else}
-                {primary.kanji || primary.kana}
-            {/if}
+          <div class="header-main-row">
+            <div class="main-word">
+              {#if settings.showFurigana}
+                {#each segmentFurigana(primary.kanji, primary.kana) as segment, i}
+                  <ruby class="card-kanji">
+                    {segment.text}
+                    {#if segment.furi}
+                      <rt class="card-furigana">{segment.furi}</rt>
+                    {:else}
+                      <rt class="card-furigana invisible" aria-hidden="true">あ</rt>
+                    {/if}
+                  </ruby>
+                {/each}
+              {:else}
+                  {primary.kanji || primary.kana}
+              {/if}
+            </div>
+
+            <!-- Przycisk Zakładki -->
+            <button 
+              class="bookmark-toggle-btn" 
+              class:active={user.bookmarks?.includes(details.selectedEntry.id)}
+              onclick={() => user.toggleBookmark(details.selectedEntry.id)}
+              aria-label="Zapisz w zakładek"
+              title={user.bookmarks?.includes(details.selectedEntry.id) ? "Usuń z zakładek" : "Zapisz w zakładek"}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill={user.bookmarks?.includes(details.selectedEntry.id) ? "currentColor" : "none"} stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
           </div>
 
           <div class="header-sub-line">
@@ -240,6 +255,41 @@
     margin-bottom: 16px;
     border-bottom: 1px solid var(--border-main);
     padding-bottom: 12px;
+  }
+
+  .header-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .bookmark-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: var(--bg-app);
+    border: 1px solid var(--border-main);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    flex-shrink: 0;
+  }
+
+  .bookmark-toggle-btn:hover {
+    background-color: var(--border-main);
+    color: var(--text-main);
+    transform: scale(1.05);
+  }
+
+  .bookmark-toggle-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: rgba(184, 44, 60, 0.05);
   }
 
   .header-sub-line {

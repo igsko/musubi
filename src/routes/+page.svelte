@@ -8,6 +8,8 @@
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
   import EntryDetails from '$lib/components/EntryDetails.svelte';
   import SettingsMenu from '$lib/components/SettingsMenu.svelte';
+  import BookmarksList from '$lib/components/BookmarksList.svelte';
+  import HistoryList from '$lib/components/HistoryList.svelte';
 
   import { search, details, uiState, user, settings } from '$lib/state.svelte.js';
 
@@ -82,7 +84,9 @@
         const selectedId = search.suggestions[currentIndex].id;
         (async () => {
           try {
-            await search.selectEntry(selectedId);
+            await details.selectWord(selectedId);
+            await user.addToHistory(selectedId);
+            search.clear();
           } catch (err) {
             console.error("Keyboard selection state update failed:", err);
           } finally {
@@ -162,6 +166,10 @@
       <SuggestionsList />
       {#if uiState.currentView === 'settings'}
         <SettingsMenu />
+      {:else if uiState.currentView === 'bookmarks'}
+        <BookmarksList />
+      {:else if uiState.currentView === 'history'}
+        <HistoryList />
       {:else}
         <EntryDetails />
       {/if}

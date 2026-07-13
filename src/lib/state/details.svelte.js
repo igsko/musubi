@@ -21,6 +21,7 @@ export class DetailsState {
       const payload = await fetchEntryDetails(id);
       const entry = JSON.parse(payload.full_json);
       entry.pitch_accent = payload.pitch_accent;
+      entry.id = id;
       this.selectedEntry = entry;
     } catch (error) {
       console.error('Error fetching entry details:', error);

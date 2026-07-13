@@ -50,10 +50,31 @@ export class UserState {
       this.history = [];
     }
 
-    if (!this.history.includes(id)) {
-      this.history.unshift(id);
-      this.history = this.history.slice(0, 50); // Limit history to last 50 entries
-    }
+    // Remove duplicates from another position and move to the beginning
+    this.history = this.history.filter(historyId => historyId !== id);
+    this.history.unshift(id);
+    this.history = this.history.slice(0, 50); // Limit to 50 entries
+
     await saveValue('history', $state.snapshot(this.history));
+  }
+
+  /**
+   * Removes a single word ID from the search history
+   * @param {number} id 
+   */
+  async removeHistoryItem(id) {
+    if (!Array.isArray(this.history)) {
+      this.history = [];
+    }
+    this.history = this.history.filter(historyId => historyId !== id);
+    await saveValue('history', $state.snapshot(this.history));
+  }
+
+  /**
+   * Clears the entire search history
+   */
+  async clearHistory() {
+    this.history = [];
+    await saveValue('history', []);
   }
 }

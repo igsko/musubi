@@ -21,10 +21,10 @@
   function handleMenuAction(optionId) {
     if(optionId === 'settings') {
       uiState.openSettings();
-    } else {
-      // PLACEHOLDER
-      // for future actions
-      uiState.menuOpen = false;
+    } else if (optionId === 'bookmarks') {
+      uiState.openBookmarks();
+    } else if (optionId === 'history') {
+      uiState.openHistory();
     }
   }
 </script>
