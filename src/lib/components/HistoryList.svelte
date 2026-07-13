@@ -2,36 +2,11 @@
   // @ts-nocheck
   import { user, details, uiState, settings } from "$lib/state.svelte.js";
   import { segmentFurigana } from "$lib/utils/furigana.js";
+  import { fetchEntryDetails } from "$lib/services/platform.js";
+  import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
 
   let loadedEntries = $state([]);
   let loading = $state(false);
-
-  async function fetchEntry(id) {
-    try {
-      const isTauri = !!(window && window.__TAURI_INTERNALS__);
-      if (!isTauri) {
-        return {
-          id,
-          headwords: [{ japanese: `Hasło ${id}, はっそ`, romaji: "hasso", note: "TEST" }],
-          meanings: [{ translations: ["Przykładowe tłumaczenie testowe dla ID: " + id], metadata: [] }]
-        };
-      }
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke('get_entry_details', { id });
-    } catch (e) {
-      console.error("Failed to load details for history ID:", id, e);
-      return null;
-    }
-  }
-
-  function splitJapanese(rawJap) {
-    if (!rawJap) return { kanji: null, kana: "" };
-    const parts = rawJap.split(',').map(p => p.trim());
-    if (parts.length >= 2) {
-      return { kanji: parts[0], kana: parts[1] };
-    }
-    return { kanji: null, kana: parts[0] };
-  }
 
   $effect(() => {
     const ids = user.history;
@@ -40,27 +15,32 @@
     async function load() {
       loading = true;
       const results = [];
+      const invalidIds = [];
+
       for (const id of ids) {
         if (!active) return;
-        const entryData = await fetchEntry(id);
-        if (entryData && active) {
-          try {
-            let fullEntry;
-            if (entryData.full_json) {
-              fullEntry = JSON.parse(entryData.full_json);
-              fullEntry.pitch_accent = entryData.pitch_accent;
-            } else if (typeof entryData === 'string') {
-              fullEntry = JSON.parse(entryData);
-            } else {
-              fullEntry = entryData;
-            }
-            fullEntry.id = id;
-            results.push(fullEntry);
-          } catch (err) {
-            console.error("Error parsing history details for ID:", id, err);
+        try {
+          const entryData = await fetchEntryDetails(id);
+          const parsed = safeParseEntry(entryData, id);
+          if (parsed && active) {
+            results.push(parsed);
           }
+        } catch (err) {
+          // if the db returns no rows, write down the ID to remove
+          if (err.toString().includes("Query returned no rows")) {
+            invalidIds.push(id);
+          }
+          console.warn(`ID ${id} does not exist in the database. Preparing to remove from history`, err);
+        } 
+      }
+
+      // remove invalid IDs from local history to prevent reoccuring errors
+      if (invalidIds.length > 0){
+        for (const invalidId of invalidIds) {
+          await user.removeHistoryItem(invalidId);
         }
       }
+
       if (active) {
         loadedEntries = results;
         loading = false;

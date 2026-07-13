@@ -2,6 +2,7 @@
   // @ts-nocheck
   import {details, user, goBack, goToWord, settings} from '$lib/state.svelte.js'; // import state and actions
   import { segmentFurigana } from '$lib/utils/furigana.js';
+  import { splitJapanese } from '$lib/utils/japanese.js';
   import PitchAccent from '$lib/components/PitchAccent.svelte';
 
   const POS_KEYWORDS = [
@@ -17,16 +18,6 @@
     'biologia', 'zoologia', 'botanika', 'lingwistyka', 'gramatyka', 
     'archeologia'
   ];
-
-  // Helper to split a raw japanese database string (e.g., "物, もの") into kanji & kana
-  function splitJapanese(rawJap) {
-    if (!rawJap) return { kanji: null, kana: "" };
-    const parts = rawJap.split(',').map(p => p.strip ? p.strip() : p.trim());
-    if (parts.length >= 2) {
-      return { kanji: parts[0], kana: parts[1] };
-    }
-    return { kanji: null, kana: parts[0] };
-  }
 
   // Detects and parses "see also" references at runtime
   function parseSeeAlso(metaText) {
