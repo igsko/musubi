@@ -269,13 +269,47 @@ async fn apply_database_update(
     *conn = Connection::open_in_memory().map_err(|e| e.to_string())?;
 
     let db_path = app_data_dir.join("dictionary.db");
+    let backup_path = app_data_dir.join("dictionary.db.bak");
 
     // ovrwrite the old database with the temporary downloaded database
     if temp_path.exists() {
         if db_path.exists() {
-            std::fs::remove_file(&db_path).map_err(|e| e.to_string())?;
+            if backup_path.exists() {
+                std::fs::remove_file(&backup_path).map_err(|e| e.to_string())?;
+            }
+            std::fs::rename(&db_path, &backup_path).map_err(|e| e.to_string())?;
         }
-        std::fs::rename(&temp_path, &db_path).map_err(|e| e.to_string())?;
+
+        // rename the downloaded database to the active path
+        if let Err(e) = std::fs::rename(&temp_path, &db_path) {
+            // if rename failed, restore the backup
+            if backup_path.exists() {
+                std::fs::rename(&backup_path, &db_path).ok();
+            }
+            return Err(format!("Failed to apply new database, rolled back: {}", e));
+        }
+
+        match Connection::open(&db_path) {
+            Ok(new_conn) => {
+                *conn = new_conn;
+                if backup_path.exists() {
+                    std::fs::remove_file(&backup_path).ok();
+                }
+            }
+            Err(e) => {
+                // rollback if the new db is corrupted and won't open
+                if backup_path.exists() {
+                    if db_path.exists() {
+                        std::fs::remove_file(&db_path).ok();
+                    }
+                    std::fs::rename(&backup_path, &db_path).ok();
+                    if let Ok(fallback_conn) = Connection::open(&db_path) {
+                        *conn = fallback_conn;
+                    }
+                }
+                return Err(format!("New database was corrupted or failed to open, rolled back: {}", e));
+            }
+        }
     } else {
         return Err("Temporary database file 'dictionary_temp.db' was not found in the AppData directory.".to_string());
     }
