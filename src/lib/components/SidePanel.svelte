@@ -137,4 +137,11 @@
       padding: 0;
     }
   }
+
+  @media (min-width: 601px) {
+    .panel-header {
+      height: var(--header-height);
+      box-sizing: border-box;
+    }
+  }
 </style>

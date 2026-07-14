@@ -243,8 +243,6 @@
     transform: translateY(-1px);
   }
 
-/* Inside src/routes/+page.svelte style block */
-
   .progress-box {
     display: flex;
     flex-direction: column;
@@ -291,6 +289,10 @@
     color: #c53030 !important;
     font-weight: 500;
     margin-bottom: 12px !important;
+  }
+
+  .search-section {
+    border-right: 1px solid var(--border-main);
   }
 
   :global(.dark) .error-text {

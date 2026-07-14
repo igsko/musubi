@@ -17,6 +17,8 @@
   --text-muted: #706b64;
   --border-main: #e0e0e0;
   --accent: #b82c3c;
+
+  --header-height: 60px; 
 }
 
 /* Dark Mode (Overridden automatically) */
@@ -30,6 +32,9 @@
   --accent: #d94152;       /* Brighter crimson for dark contrast */
 }
 
+:root.compact-layout {
+  --header-height: 44px;
+}
 
 /* Global Body Styling */
 body {
@@ -162,10 +167,18 @@ main.container.tauri-desktop {
     .search-section {
         grid-column: 1;
         grid-row: 1;
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
         padding: 8px 8px 8px 8px;
         margin-bottom: 0px;
         background-color: var(--bg-sidebar);
         border-bottom: 1px solid var(--border-main);
+    }
+
+    .compact-layout .search-section {
+        padding: 4px 8px;
     }
 
     /* 
