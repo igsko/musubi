@@ -4,6 +4,7 @@
   import { segmentFurigana } from "$lib/utils/furigana.js";
   import { fetchEntryDetails } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
+  import SidePanel from "$lib/components/SidePanel.svelte";
 
   let loadedEntries = $state([]);
   let loading = $state(false);
@@ -59,6 +60,13 @@
     uiState.currentView = 'details';
   }
 
+  function handleKeyDown(id, event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectEntry(id);
+    }
+  }
+
   async function removeHistoryItem(id, event) {
     event.stopPropagation(); // prevents opening entry details when trying to delete entry
     await user.removeHistoryItem(id);
@@ -71,141 +79,78 @@
   }
 </script>
 
-<div class="history-container">
-  <header class="history-header">
-    <div class="header-title-section">
-      <h2>Historia</h2>
-      {#if loadedEntries.length > 0}
-        <button class="clear-all-btn" onclick={clearAllHistory} title="Wyczyść całą historię">
-          Wyczyść
-        </button>
-      {/if}
-    </div>
-    <button
-      class="close-btn"
-      onclick={() => uiState.closeSettings()}
-      aria-label="Zamknij historię"
+{#snippet headerControls()}
+  {#if loadedEntries.length > 0}
+    <button 
+      class="clear-all-btn"
+      onclick={clearAllHistory}
+      title="Wyczyść całą historię"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
+      Wyczyść
     </button>
-  </header>
+  {/if}
+{/snippet}
 
-  <div class="history-content">
-    {#if loading && loadedEntries.length === 0}
-      <div class="status-message">Ładowanie historii...</div>
-    {:else if loadedEntries.length === 0}
-      <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        <p>Brak historii wyszukiwania</p>
-        <p class="sub-text">Tutaj pojawi się lista ostatnio wyświetlanych przez Ciebie haseł.</p>
-      </div>
-    {:else}
-      <div class="list-wrapper">
-        {#each loadedEntries as entry (entry.id)}
-          {@const primaryHW = entry.headwords[0]}
-          {@const parts = splitJapanese(primaryHW?.japanese)}
-          <div 
-            class="list-item" 
-            role="button"
-            tabindex="0"
-            onclick={() => selectEntry(entry.id)}
-            onkeydown={(e) => handleKeyDown(entry.id, e)}
-          >
-            <div class="item-main">
-              <span class="japanese-word" lang="ja">
-                {#if settings.showFurigana}
-                  {#each segmentFurigana(parts.kanji, parts.kana) as segment}
-                    <ruby class="kanji-with-reading">
-                      {segment.text}
-                      {#if segment.furi}
-                        <rt class="furigana">{segment.furi}</rt>
-                      {/if}
-                    </ruby>
-                  {/each}
-                {:else}
-                  {parts.kanji || parts.kana}
-                {/if}
-              </span>
-              <span class="romaji">{primaryHW?.romaji}</span>
-            </div>
-            
-            <div class="item-sub">
-              <span class="translation">
-                {entry.meanings?.[0]?.translations ? entry.meanings[0].translations.slice(0, 3).join(', ') : 'Brak tłumaczenia'}
-              </span>
-              <button class="remove-btn" onclick={(e) => removeHistoryItem(entry.id, e)} aria-label="Usuń z historii">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="trash-icon">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
+<SidePanel title="Historia" {headerControls} onClose={() => uiState.closeSettings()}>
+  {#if loading && loadedEntries.length === 0}
+    <div class="status-message">Ładowanie historii...</div>
+  {:else if loadedEntries.length === 0}
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <p>Brak historii wyszukiwania</p>
+      <p class="sub-text">Tutaj pojawi się lista ostatnio wyświetlanych przez Ciebie haseł.</p>
+    </div>
+  {:else}
+    <div class="list-wrapper">
+      {#each loadedEntries as entry (entry.id)}
+        {@const primaryHW = entry.headwords[0]}
+        {@const parts = splitJapanese(primaryHW?.japanese)}
+        <div 
+          class="list-item" 
+          role="button"
+          tabindex="0"
+          onclick={() => selectEntry(entry.id)}
+          onkeydown={(e) => handleKeyDown(entry.id, e)}
+        >
+          <div class="item-main">
+            <span class="japanese-word" lang="ja">
+              {#if settings.showFurigana}
+                {#each segmentFurigana(parts.kanji, parts.kana) as segment}
+                  <ruby class="kanji-with-reading">
+                    {segment.text}
+                    {#if segment.furi}
+                      <rt class="furigana">{segment.furi}</rt>
+                    {/if}
+                  </ruby>
+                {/each}
+              {:else}
+                {parts.kanji || parts.kana}
+              {/if}
+            </span>
+            <span class="romaji">{primaryHW?.romaji}</span>
           </div>
-        {/each}
-      </div>
-    {/if}
-  </div>
-</div>
+          
+          <div class="item-sub">
+            <span class="translation">
+              {entry.meanings?.[0]?.translations ? entry.meanings[0].translations.slice(0, 3).join(', ') : 'Brak tłumaczenia'}
+            </span>
+            <button class="remove-btn" onclick={(e) => removeHistoryItem(entry.id, e)} aria-label="Usuń z historii">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="trash-icon">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      {/each}
+    </div>
+  {/if}
+</SidePanel>
 
 <style>
-  .history-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    max-height: 100%;
-    min-height: 0;
-    background-color: var(--bg-card);
-    color: var(--text-main);
-    box-sizing: border-box;
-    border-left: 1px solid var(--border-main);
-    overflow: hidden;
-    padding: 0;
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    container-type: inline-size;
-    container-name: history;
-  }
-
-  .history-header {
-    flex: 0 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-main);
-    padding: 10px 12px;
-    background-color: var(--bg-card);
-    z-index: 10;
-  }
-
-  .header-title-section {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .history-header h2 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
   .clear-all-btn {
     font-size: 0.75rem;
     font-weight: 550;
@@ -221,34 +166,6 @@
   .clear-all-btn:hover {
     background-color: rgba(184, 44, 60, 0.12);
     border-color: var(--accent);
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.15s, color 0.15s;
-  }
-
-  .close-btn:hover {
-    background-color: var(--border-main);
-    color: var(--text-main);
-  }
-
-  .history-content {
-    flex: 1 1 0%;
-    min-height: 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 12px;
-    box-sizing: border-box;
   }
 
   .status-message {
@@ -398,19 +315,5 @@
   .trash-icon {
     width: 16px;
     height: 16px;
-  }
-
-  @media (max-width: 600px) {
-    .history-container {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 100;
-      border-left: none;
-      padding: 0;
-    }
   }
 </style>

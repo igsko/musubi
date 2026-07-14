@@ -4,6 +4,7 @@
   import { segmentFurigana } from "$lib/utils/furigana.js";
   import { fetchEntryDetails } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
+  import SidePanel from "$lib/components/SidePanel.svelte";
 
   let loadedEntries = $state([]);
   let loading = $state(false);
@@ -72,154 +73,64 @@
   }
 </script>
 
-<div class="bookmarks-container">
-  <header class="bookmarks-header">
-    <h2>Zakładki</h2>
-    <button
-      class="close-btn"
-      onclick={() => uiState.closeSettings()}
-      aria-label="Zamknij zakładki"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
+<SidePanel title="Zakładki" onClose={() => uiState.closeSettings()}>
+  {#if loading && loadedEntries.length === 0}
+    <div class="status-message">Ładowanie zakładek...</div>
+  {:else if loadedEntries.length === 0}
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
       </svg>
-    </button>
-  </header>
-
-  <div class="bookmarks-content">
-    {#if loading && loadedEntries.length === 0}
-      <div class="status-message">Ładowanie zakładek...</div>
-    {:else if loadedEntries.length === 0}
-      <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
-          <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-        </svg>
-        <p>Brak zapisanych zakładek</p>
-        <p class="sub-text">Kliknij ikonę gwiazdki na karcie hasła, aby je tutaj dodać.</p>
-      </div>
-    {:else}
-      <div class="list-wrapper">
-        {#each loadedEntries as entry (entry.id)}
-          {@const primaryHW = entry.headwords[0]}
-          {@const parts = splitJapanese(primaryHW?.japanese)}
-          <div 
-            class="list-item" 
-            role="button"
-            tabindex="0"
-            onclick={() => selectEntry(entry.id)}
-            onkeydown={(e) => handleKeyDown(entry.id, e)}
-          >
-            <div class="item-main">
-              <span class="japanese-word" lang="ja">
-                {#if settings.showFurigana}
-                  {#each segmentFurigana(parts.kanji, parts.kana) as segment}
-                    <ruby class="kanji-with-reading">
-                      {segment.text}
-                      {#if segment.furi}
-                        <rt class="furigana">{segment.furi}</rt>
-                      {/if}
-                    </ruby>
-                  {/each}
-                {:else}
-                  {parts.kanji || parts.kana}
-                {/if}
-              </span>
-              <span class="romaji">{primaryHW?.romaji}</span>
-            </div>
-            
-            <div class="item-sub">
-              <span class="translation">
-                {entry.meanings?.[0]?.translations ? entry.meanings[0].translations.slice(0, 3).join(', ') : 'Brak tłumaczenia'}
-              </span>
-              <button class="remove-btn" onclick={(e) => removeBookmark(entry.id, e)} aria-label="Usuń z zakładek">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="star-icon">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              </button>
-            </div>
+      <p>Brak zapisanych zakładek</p>
+      <p class="sub-text">Kliknij ikonę gwiazdki na karcie hasła, aby je tutaj dodać.</p>
+    </div>
+  {:else}
+    <div class="list-wrapper">
+      {#each loadedEntries as entry (entry.id)}
+        {@const primaryHW = entry.headwords[0]}
+        {@const parts = splitJapanese(primaryHW?.japanese)}
+        <div 
+          class="list-item" 
+          role="button"
+          tabindex="0"
+          onclick={() => selectEntry(entry.id)}
+          onkeydown={(e) => handleKeyDown(entry.id, e)}
+        >
+          <div class="item-main">
+            <span class="japanese-word" lang="ja">
+              {#if settings.showFurigana}
+                {#each segmentFurigana(parts.kanji, parts.kana) as segment}
+                  <ruby class="kanji-with-reading">
+                    {segment.text}
+                    {#if segment.furi}
+                      <rt class="furigana">{segment.furi}</rt>
+                    {/if}
+                  </ruby>
+                {/each}
+              {:else}
+                {parts.kanji || parts.kana}
+              {/if}
+            </span>
+            <span class="romaji">{primaryHW?.romaji}</span>
           </div>
-        {/each}
-      </div>
-    {/if}
-  </div>
-</div>
+          
+          <div class="item-sub">
+            <span class="translation">
+              {entry.meanings?.[0]?.translations ? entry.meanings[0].translations.slice(0, 3).join(', ') : 'Brak tłumaczenia'}
+            </span>
+            <button class="remove-btn" onclick={(e) => removeBookmark(entry.id, e)} aria-label="Usuń z zakładek">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="star-icon">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      {/each}
+    </div>
+  {/if}
+</SidePanel>
 
 <style>
-  .bookmarks-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    max-height: 100%;
-    min-height: 0;
-    background-color: var(--bg-card);
-    color: var(--text-main);
-    box-sizing: border-box;
-    border-left: 1px solid var(--border-main);
-    overflow: hidden;
-    padding: 0;
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    container-type: inline-size;
-    container-name: bookmarks;
-  }
-
-  .bookmarks-header {
-    flex: 0 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-main);
-    padding: 10px 12px;
-    background-color: var(--bg-card);
-    z-index: 10;
-  }
-
-  .bookmarks-header h2 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.15s, color 0.15s;
-  }
-
-  .close-btn:hover {
-    background-color: var(--border-main);
-    color: var(--text-main);
-  }
-
-  .bookmarks-content {
-    flex: 1 1 0%;
-    min-height: 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 12px;
-    box-sizing: border-box;
-  }
-
   .status-message {
     padding: 24px;
     text-align: center;
@@ -361,19 +272,5 @@
 
   .star-icon {
     color: var(--accent);
-  }
-
-  @media (max-width: 600px) {
-    .bookmarks-container {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 100;
-      border-left: none;
-      padding: 0;
-    }
   }
 </style>
