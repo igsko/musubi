@@ -3,6 +3,7 @@
  */
 export class UIState {
   currentView = $state('details'); // 'details' | 'settings' | 'bookmarks' | 'history'
+  returnView = $state('search');   // 'search' | 'bookmarks' || 'history'
   menuOpen = $state(false);        // tracks hamburger dropdown toggle
 
   toggleMenu() {

@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import {details, user, goBack, goToWord, settings} from '$lib/state.svelte.js'; // import state and actions
+  import {details, user, goBack, goToWord, settings, uiState} from '$lib/state.svelte.js'; // import state and actions
   import { segmentFurigana } from '$lib/utils/furigana.js';
   import { splitJapanese } from '$lib/utils/japanese.js';
   import PitchAccent from '$lib/components/PitchAccent.svelte';
@@ -77,12 +77,22 @@
 
 {#if details.selectedEntry}
   <div class="card">
-    <button class="back-btn" onclick={() => goBack()}>
+    <button 
+      class="back-btn" 
+      class:show-on-desktop={uiState.returnView !== 'search'}
+      onclick={() => goBack()}
+    >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
-      Powrót do wyników
+      {#if uiState.returnView === 'bookmarks'}
+        Powrót do zakładek
+      {:else if uiState.returnView === 'history'}
+        Powrót do historii
+      {:else}
+        Powrót do wyników
+      {/if}
     </button>
 
     <div class="card-content">
@@ -612,8 +622,24 @@
       border-left: none;
     }
 
-    .back-btn {
-      display: none !important;
+    .back-btn.show-on-desktop {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 0 0 16px 0;
+      background-color: transparent !important;
+      border: none;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .back-btn.show-on-desktop:hover {
+      text-decoration: underline;
+      background-color: transparent !important;
     }
   }
 </style>

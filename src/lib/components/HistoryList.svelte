@@ -56,6 +56,7 @@
   });
 
   function selectEntry(id) {
+    uiState.returnView = 'history';
     details.selectWord(id);
     uiState.currentView = 'details';
   }

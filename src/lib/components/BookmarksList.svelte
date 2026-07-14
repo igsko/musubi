@@ -55,6 +55,7 @@
   });
 
   function selectEntry(id) {
+    uiState.returnView = 'bookmarks';
     details.selectWord(id);
     user.addToHistory(id);
     uiState.currentView = "details";

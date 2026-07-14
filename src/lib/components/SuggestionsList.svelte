@@ -43,10 +43,11 @@
       <li class:active={search.selectedIndex === idx}>
         <button type="button" onclick={
           () => {
-            search.selectedIndex = idx;         // synchronize index
+            search.selectedIndex = idx; // synchronize index
 
             // switch view and clear list instantly
             uiState.closeSettings();           
+            uiState.returnView = 'search';
 
             details.selectWord(sug.id).catch(err => {
               console.error("Failed to load entry details:", err);

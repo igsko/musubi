@@ -86,6 +86,7 @@
           try {
             await details.selectWord(selectedId);
             await user.addToHistory(selectedId);
+            uiState.returnView = 'search';
             search.clear();
           } catch (err) {
             console.error("Keyboard selection state update failed:", err);
