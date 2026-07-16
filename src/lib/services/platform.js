@@ -73,6 +73,22 @@ export async function fetchEntryDetails(id) {
   }
 }
 
+/**
+ * Fetches details for multiple dictionary entries based on their IDs.
+ * If running in Tauri, it invokes the Rust backend. If in a web environment, it returns mock data.
+ * @param {number[]} ids - The IDs of the entries to fetch.
+ * @returns {Promise<any[]>} A promise resolving to the list of entry details.
+ */
+export async function fetchMultipleEntries(ids) {
+  if (isTauri) {
+    const { invoke } = await import('@tauri-apps/api/core');
+    return await invoke('get_multiple_entries', { ids });
+  } else {
+    // browser mock
+    return [];
+  }
+}
+
 // Safe window control wrappers
 export async function minimizeWindow() {
   if (isTauri) {

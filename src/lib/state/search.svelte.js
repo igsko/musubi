@@ -88,7 +88,7 @@ export class SearchState {
 
       // Ensure the user hasn't typed something else while we were fetching more results
       if (this.query === activeQuery) {
-        this.suggestions.push(...results);
+        this.suggestions = [...this.suggestions, ...results];
         if (results.length < 20) {
           this.#hasMore = false;
         }

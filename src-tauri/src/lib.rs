@@ -34,6 +34,18 @@ pub struct EntryPayload {
     full_json: String,
 }
 
+/// A lightweight struct returned to the frontend containing a full entry payload.
+///
+/// - `id` is the internal integer primary key for the entry.
+/// - `pitch_accent` is an optional string representing the pitch accent.
+/// - `full_json` is a string containing the complete JSON representation.
+#[derive(Serialize)]
+pub struct MultiEntryPayload {
+    id: i64,
+    pitch_accent: Option<String>,
+    full_json: String,
+}
+
 // A lightweight struct returned to the frontend as a suggestion item.
 //
 // - `id` is the internal integer primary key for the entry in the `entries` table.
@@ -52,23 +64,6 @@ pub struct Suggestion {
     pitch_accent: Option<String>,
 }
 
-// Open connection helper to load database from the writable AppData directory
-/// Open a connection to the SQLite database inside the AppData folder.
-///
-/// Any error is converted into a `String` for simple propagation to command callers.
-fn open_db(app: &AppHandle) -> Result<Connection, String> {
-    // Resolve the path to the writable local data directory
-    let app_data_dir = app
-        .path()
-        .app_local_data_dir()
-        .map_err(|e| e.to_string())?;
-
-    let db_path = app_data_dir.join("dictionary.db");
-
-    // Open an SQLite connection to the file
-    Connection::open(db_path).map_err(|e| e.to_string())
-}
-
 /// Query the search index and return a short list of suggestions.
 ///
 /// - `app`: The `AppHandle` allows resolving resource paths and other runtime APIs.
@@ -79,7 +74,7 @@ fn open_db(app: &AppHandle) -> Result<Connection, String> {
 /// message on failure. Errors are intentionally simple strings because Tauri
 /// commands are typically consumed by JavaScript, which expects string messages
 /// for display/logging.
-#[tauri::command]
+#[tauri::command (async)]
 async fn get_suggestions(
     state: State<'_, DbState>,
     query: String,
@@ -146,8 +141,8 @@ async fn get_suggestions(
 /// The `entries` table stores a `full_json` column that contains the structured
 /// data for an entry. This command returns that JSON blob as a `String` so the
 /// frontend can parse and render it as needed.
-#[tauri::command]
-async fn get_entry_details(state: State<'_, DbState>, id: i64) -> Result<EntryPayload, String> {
+#[tauri::command (async)]
+fn get_entry_details(state: State<'_, DbState>, id: i64) -> Result<EntryPayload, String> {
     let conn = state.conn.lock().unwrap();
 
     // Prepare a parameterized query to fetch the full JSON payload for the selected entry.
@@ -176,10 +171,43 @@ async fn get_entry_details(state: State<'_, DbState>, id: i64) -> Result<EntryPa
     Ok(payload)
 }
 
+/// Retrieve the full JSON payloads for a collection of entry IDs.
+///
+/// The `entries` table stores a `full_json` column that contains the structured
+/// data for each entry. This command returns the JSON blobs and optional pitch
+/// accent information for every existing ID in the provided list, skipping any
+/// IDs that are not present in the database.
+#[tauri::command (async)]
+fn get_multiple_entries(state: State<'_, DbState>, ids: Vec<i64>) -> Result<Vec<MultiEntryPayload>, String> {
+    let conn = state.conn.lock().unwrap();
+    // cache prepared statement
+    let mut stmt = conn
+        .prepare("SELECT pitch_accent, full_json FROM entries WHERE id = ?1 OR id = CAST(?1 AS TEXT)")
+        .map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    
+    for id in ids {
+        // if record exists push to vec. if rusqlite throws err e.g. QueryReturnedNoRows,
+        // ignore that record - it will be detected as missing in JS
+        if let Ok((pitch_accent, full_json)) = stmt.query_row([id], |row| {
+            Ok((row.get::<_, Option<String>>(0)?, row.get::<_, String>(1)?))
+        }) {
+            results.push(MultiEntryPayload {
+                id,
+                pitch_accent,
+                full_json,
+            });
+        }
+    }
+
+    Ok(results)
+}
+
 /// Retrieve the database version from the SQLite metadata table.
 /// This allows the Svelte frontend to instantly know which database version is loaded
-#[tauri::command]
-async fn get_db_version(state: State<'_, DbState>) -> Result<String, String> {
+#[tauri::command (async)]
+fn get_db_version(state: State<'_, DbState>) -> Result<String, String> {
     let conn = state.conn.lock().unwrap();
     
     let mut stmt = conn
@@ -194,8 +222,8 @@ async fn get_db_version(state: State<'_, DbState>) -> Result<String, String> {
 }
 
 /// Hot-swaps the active database connection with a newly downloaded database
-#[tauri::command]
-async fn apply_database_update(
+#[tauri::command (async)]
+fn apply_database_update(
     app: AppHandle,
     state: State<'_, DbState>,
     url: String, // passed by svelte
@@ -261,6 +289,8 @@ async fn apply_database_update(
         total: total_size,
         speed: downloaded as f64 / start_time.elapsed().as_secs_f64(),
     }).ok();
+
+    drop(file);
 
     // lock active database connection
     let mut conn = state.conn.lock().unwrap();
@@ -358,8 +388,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_suggestions, 
             get_entry_details,
+            get_multiple_entries,
             get_db_version,
             apply_database_update
+
         ])
         // `generate_context!` reads the `tauri.conf.json` and embedded assets.
         .run(tauri::generate_context!())

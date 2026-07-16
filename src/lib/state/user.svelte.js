@@ -41,6 +41,17 @@ export class UserState {
   }
 
   /**
+   * Bulk removes a list of IDs from bookmarks
+   * @param {number[]} idsToRemove 
+   */
+  async removeBookmarks(idsToRemove) {
+    if (!Array.isArray(this.bookmarks)) return;
+
+    this.bookmarks = this.bookmarks.filter(id => !idsToRemove.includes(id));
+    await saveValue(STORAGE_KEYS.BOOKMARKS, $state.snapshot(this.bookmarks));
+  }
+
+  /**
    * Adds a word ID to the user's history if it's not already present.
    * Maintains a maximum of 50 entries in the history.
    * @param {string} id

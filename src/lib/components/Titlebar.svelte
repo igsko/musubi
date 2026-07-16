@@ -10,7 +10,8 @@
     <div class="app-title" data-tauri-drag-region>Słownik Japońsko-Polski</div>
   </div>
 
-  <div class="titlebar-section right" data-tauri-drag-region>
+  <div class="titlebar-section right">
+    <div class="drag-spacer" data-tauri-drag-region style="flex-grow: 1; height: 100%;"></div>
     {#if isTauri}
       <div class="window-controls">
         <button class="control-btn" onclick={minimizeWindow} aria-label="Minimize">

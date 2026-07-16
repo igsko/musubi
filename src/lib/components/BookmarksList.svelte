@@ -2,7 +2,7 @@
   //@ts-nocheck
   import { user, details, uiState, settings } from "$lib/state.svelte.js";
   import { segmentFurigana } from "$lib/utils/furigana.js";
-  import { fetchEntryDetails } from "$lib/services/platform.js";
+  import { fetchMultipleEntries } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
   import SidePanel from "$lib/components/SidePanel.svelte";
 
@@ -14,44 +14,49 @@
     let active = true;
 
     async function load() {
+      if (ids.length === 0) {
+        loadedEntries = [];
+        return;
+      }
+
       loading = true;
       try {
+        // batch IPC call
+        const rawPayloads = await fetchMultipleEntries(ids);
+
+        // protection against thread racing
+        if (!active) return;
+
         const results = [];
-        const invalidIds = [];
+        const fetchedIds = new Set();
 
-        console.log("[BookmarksList] loading started, saved id:", ids);
-
-        for (const id of ids) {
-          if (!active) return;
+        // safe single element parsing:
+        for (const payload of rawPayloads) {
           try {
-            console.log("[BookmarksList] fetching details for id:", id);
-            const entryData = await fetchEntryDetails(id);
-            console.log("[BookmarksList] received raw data:", entryData);
-            const parsed = safeParseEntry(entryData, id);
-            console.log("[BookmarksList] mapped entry obj:", parsed);
-            if (parsed && active) {
+            const parsed = safeParseEntry(payload, payload.id);
+            if (parsed) {
               results.push(parsed);
+              fetchedIds.add(payload.id); // remember successfully found ID
             }
-          } catch (err) {
-            if (err.toString().includes("Query returned no rows")) {
-              invalidIds.push(id);
-            }
-            console.warn(`ID ${id} does not exist in the database. Preparing to remove from bookmarks`, err);
+          } catch (parseErr) {
+            console.error(`[BookmarksList] Error parsing record ${payload.id}:`, parseErr);
           }
         }
 
-        // remove invalid IDs from bookmarks to prevent reoccuring errors
+        // self healing, missing ID in the db
+        const invalidIds = ids.filter(id => !fetchedIds.has(id));
+
         if (invalidIds.length > 0) {
-          for (const invalidId of invalidIds) {
-            await user.toggleBookmark(invalidId);
-          }
+          console.warn(`[BookmarksList] detected records that do not exist in the db. Removing from bookmarks:`, invalidIds);
+          // single save op
+          await user.removeBookmarks(invalidIds);
         }
 
         if (active) {
           loadedEntries = results;
         }
       } catch (globalErr) {
-        console.error("[BookmarksList] critical error in load():", globalErr);
+        console.error("[BookmarksList] Critical error while loading bookmarks:", globalErr);
       } finally {
         if (active) {
           loading = false;
