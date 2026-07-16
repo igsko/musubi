@@ -1,5 +1,5 @@
 //@ts-nocheck
-import {getValue, saveValue} from '$lib/services/storage.js';
+import {getValue, saveValue, STORAGE_KEYS} from '$lib/services/storage.js';
 
 /**
  * Manages the state of user-specific data, including bookmarks and history.
@@ -15,8 +15,8 @@ export class UserState {
    * @returns {Promise<void>} A promise that resolves when the user state has been initialized.
    */
   async init() {
-    const savedBookmarks = await getValue('bookmarks', []);
-    const savedHistory = await getValue('history', []);
+    const savedBookmarks = await getValue(STORAGE_KEYS.BOOKMARKS, []);
+    const savedHistory = await getValue(STORAGE_KEYS.HISTORY, []);
 
     // if the store returns undefined/null, fallback to an empty array to avoid errors
     this.bookmarks = Array.isArray(savedBookmarks) ? savedBookmarks : [];
@@ -37,7 +37,7 @@ export class UserState {
     } else {
       this.bookmarks.push(id);
     }
-    await saveValue('bookmarks', $state.snapshot(this.bookmarks));
+    await saveValue(STORAGE_KEYS.BOOKMARKS, $state.snapshot(this.bookmarks));
   }
 
   /**
@@ -55,7 +55,7 @@ export class UserState {
     this.history.unshift(id);
     this.history = this.history.slice(0, 50); // Limit to 50 entries
 
-    await saveValue('history', $state.snapshot(this.history));
+    await saveValue(STORAGE_KEYS.HISTORY, $state.snapshot(this.history));
   }
 
   /**
@@ -67,7 +67,7 @@ export class UserState {
       this.history = [];
     }
     this.history = this.history.filter(historyId => historyId !== id);
-    await saveValue('history', $state.snapshot(this.history));
+    await saveValue(STORAGE_KEYS.HISTORY, $state.snapshot(this.history));
   }
 
   /**
@@ -75,6 +75,6 @@ export class UserState {
    */
   async clearHistory() {
     this.history = [];
-    await saveValue('history', []);
+    await saveValue(STORAGE_KEYS.HISTORY, []);
   }
 }

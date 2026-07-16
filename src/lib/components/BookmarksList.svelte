@@ -15,22 +15,29 @@
 
     async function load() {
       loading = true;
-      const results = [];
-      const invalidIds = [];
+      try {
+        const results = [];
+        const invalidIds = [];
 
-      for (const id of ids) {
-        if (!active) return;
-        try {
-          const entryData = await fetchEntryDetails(id);
-          const parsed = safeParseEntry(entryData, id);
-          if (parsed && active) {
-            results.push(parsed);
+        console.log("[BookmarksList] loading started, saved id:", ids);
+
+        for (const id of ids) {
+          if (!active) return;
+          try {
+            console.log("[BookmarksList] fetching details for id:", id);
+            const entryData = await fetchEntryDetails(id);
+            console.log("[BookmarksList] received raw data:", entryData);
+            const parsed = safeParseEntry(entryData, id);
+            console.log("[BookmarksList] mapped entry obj:", parsed);
+            if (parsed && active) {
+              results.push(parsed);
+            }
+          } catch (err) {
+            if (err.toString().includes("Query returned no rows")) {
+              invalidIds.push(id);
+            }
+            console.warn(`ID ${id} does not exist in the database. Preparing to remove from bookmarks`, err);
           }
-        } catch (err) {
-          if (err.toString().includes("Query returned no rows")) {
-            invalidIds.push(id);
-          }
-          console.warn(`ID ${id} does not exist in the database. Preparing to remove from bookmarks`, err);
         }
 
         // remove invalid IDs from bookmarks to prevent reoccuring errors
@@ -42,6 +49,11 @@
 
         if (active) {
           loadedEntries = results;
+        }
+      } catch (globalErr) {
+        console.error("[BookmarksList] critical error in load():", globalErr);
+      } finally {
+        if (active) {
           loading = false;
         }
       }

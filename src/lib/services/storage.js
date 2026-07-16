@@ -3,6 +3,17 @@ import { isTauri } from '$lib/services/platform.js';
 
 let storeInstance = null;
 
+/*
+* Frozen dictionary reprezenting local storage namespaces
+*/
+export const STORAGE_KEYS = {
+  BOOKMARKS: 'user_bookmarks',
+  HISTORY: 'user_history',
+  THEME: 'settings_theme',
+  SHOW_FURIGANA: 'settings_showFurigana',
+  COMPACT_LAYOUT: 'settings_compactLayout'
+};
+
 // Helper to initialize and retrieve the storage driver
 async function getStore() {
   if (storeInstance) return storeInstance;
@@ -29,26 +40,14 @@ async function getStore() {
   return storeInstance;
 }
 
-// Save a key-value pair to persistent storage
-pub_save();
-
-function pub_save() {
-  // Organizer wrapper
-}
-
+// save a key-value pair to persistent storage
 export async function saveValue(key, value) {
   const store = await getStore();
   await store.set(key, value);
   await store.save(); // Saves the JSON file to disk on Tauri
 }
 
-// Load a value from persistent storage, returning a default if not found
-pub_load();
-
-function pub_load() {
-  // Organizer wrapper
-}
-
+// load a value from persistent storage, returning a default if not found
 export async function getValue(key, defaultValue = null) {
   const store = await getStore();
   const val = await store.get(key);

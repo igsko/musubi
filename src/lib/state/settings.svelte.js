@@ -1,5 +1,5 @@
 //@ts-nocheck
-import {getValue, saveValue} from '$lib/services/storage.js';
+import {getValue, saveValue, STORAGE_KEYS} from '$lib/services/storage.js';
 
 class SettingsState {
   localDbVersion = $state('unknown');
@@ -38,10 +38,10 @@ class SettingsState {
    * Initializes the settings state by loading values from storage and applying them to the document.
    */
   async init() {
-    this.theme = await getValue('settings_theme', 'system');
-    this.showFurigana = await getValue('settings_showFurigana', true);
-    this.compactLayout = await getValue('settings_compactLayout', false); 
-    // this.localDbVersion = '1.0.0' // FOR DEBUGGING
+    this.theme = await getValue(STORAGE_KEYS.THEME, 'system');
+    this.showFurigana = await getValue(STORAGE_KEYS.SHOW_FURIGANA, true);
+    this.compactLayout = await getValue(STORAGE_KEYS.COMPACT_LAYOUT, false); 
+    // this.localDbVersion = '1.0.0' // FOR DEBUGGING update logic, quickly uncomment
 
     // fetch current SQLite database version from the metadata table via rust
     try {
@@ -63,7 +63,7 @@ class SettingsState {
    */
   setTheme(value) {
     this.theme = value;
-    saveValue('settings_theme', value);
+    saveValue(STORAGE_KEYS.THEME, value);
     this.applyTheme();
   }
 
@@ -73,7 +73,7 @@ class SettingsState {
    */
   setShowFurigana(value) {
     this.showFurigana = value;
-    saveValue('settings_showFurigana', value);
+    saveValue(STORAGE_KEYS.SHOW_FURIGANA, value);
   }
 
   /**
@@ -82,7 +82,7 @@ class SettingsState {
    */
   setCompactLayout(value) {
     this.compactLayout = value;
-    saveValue('settings_compactLayout', value);
+    saveValue(STORAGE_KEYS.COMPACT_LAYOUT, value);
     this.applyLayout();
   }
 
