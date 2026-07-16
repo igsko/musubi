@@ -2,7 +2,7 @@
   // @ts-nocheck
   import { user, details, uiState, settings } from "$lib/state.svelte.js";
   import { segmentFurigana } from "$lib/utils/furigana.js";
-  import { fetchEntryDetails } from "$lib/services/platform.js";
+  import { fetchMultipleEntries } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
   import SidePanel from "$lib/components/SidePanel.svelte";
 
@@ -14,37 +14,53 @@
     let active = true;
 
     async function load() {
-      loading = true;
-      const results = [];
-      const invalidIds = [];
-
-      for (const id of ids) {
-        if (!active) return;
-        try {
-          const entryData = await fetchEntryDetails(id);
-          const parsed = safeParseEntry(entryData, id);
-          if (parsed && active) {
-            results.push(parsed);
-          }
-        } catch (err) {
-          // if the db returns no rows, write down the ID to remove
-          if (err.toString().includes("Query returned no rows")) {
-            invalidIds.push(id);
-          }
-          console.warn(`ID ${id} does not exist in the database. Preparing to remove from history`, err);
-        } 
-      }
-
-      // remove invalid IDs from local history to prevent reoccuring errors
-      if (invalidIds.length > 0){
-        for (const invalidId of invalidIds) {
-          await user.removeHistoryItem(invalidId);
-        }
-      }
-
-      if (active) {
-        loadedEntries = results;
+      if (ids.length === 0) {
+        loadedEntries = [];
         loading = false;
+        return;
+      }
+
+      loading = true;
+      try {
+        // batch IPC call
+        const rawPayloads = await fetchMultipleEntries(ids);
+
+        // protection against thread racing
+        if(!active) return;
+
+        const results = [];
+        const fetchedIds = new Set();
+
+        // single element safe parsing
+        for (const payload of rawPayloads) {
+          try {
+            const parsed = safeParseEntry(payload, payload.id);
+            if (parsed) {
+              results.push(parsed);
+              fetchedIds.add(payload.id); // remember successfully fetched records
+            }
+          } catch (parseErr) {
+            console.error(`[HistoryList] Error parsing history entry with ID ${payload.id}:`, parseErr);
+          }
+        }
+
+        // self healing, missing ID in the db
+        const invalidIds = ids.filter(id => !fetchedIds.has(id));
+        if (invalidIds.length > 0) {
+          console.warn(`[HistoryList] detected records that do not exist in the db. Removing from history:`, invalidIds);
+          // single save op
+          await user.removeHistoryItems(invalidIds);
+        }
+
+        if (active) {
+          loadedEntries = results;
+        }
+      } catch (globalErr) {
+        console.error("[HistoryList] Critical error while loading history:", globalErr);
+      } finally {
+        if (active) {
+          loading = false;
+        }
       }
     }
 

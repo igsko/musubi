@@ -82,6 +82,17 @@ export class UserState {
   }
 
   /**
+   * Bulk removes a list of IDs from history
+   * @param {number[]} idsToRemove
+   */
+  async removeHistoryItems(idsToRemove) {
+    if (!Array.isArray(this.history)) return;
+
+    this.history = this.history.filter(id => !idsToRemove.includes(id));
+    await saveValue(STORAGE_KEYS.HISTORY, $state.snapshot(this.history));
+  }
+
+  /**
    * Clears the entire search history
    */
   async clearHistory() {
