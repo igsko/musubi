@@ -300,15 +300,17 @@
     margin-bottom: 12px !important;
   }
 
-  .search-section {
-    border-right: 1px solid var(--border-main);
-  }
-
   :global(.dark) .error-text {
     color: #feb2b2 !important;
   }
 
   @keyframes spin {
     to { transform: rotate(360deg); }
+  }
+
+  @media (min-width: 601px) {
+    .search-section {
+      border-right: 1px solid var(--border-main);
+    }
   }
 </style>

@@ -15,7 +15,9 @@
         "title": "dictionary",
         "width": 360,
         "height": 640,
-        "decorations": false
+        "decorations": false,
+        "minWidth": 200,
+        "minHeight": 300
       }
     ],
     "security": {

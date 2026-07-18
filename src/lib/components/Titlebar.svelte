@@ -54,6 +54,7 @@
       height: 100%;
       box-sizing: border-box;
       border: none;
+      min-width: 0;
   }
 
   .titlebar-section.left {
@@ -61,10 +62,14 @@
       background-color: var(--bg-card);
       align-items: center;
       padding-left: 12px;
+      padding-right: 8px;
+      min-width: 0;
+      overflow: hidden;
   }
 
   .titlebar-section.right {
       flex-grow: 1;
+      flex-shrink: 0;
       background-color: var(--bg-card);
       justify-content: flex-end;
       align-items: stretch;
@@ -75,6 +80,10 @@
       letter-spacing: 0.02em;
       font-weight: 500;
       color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
   }
 
   .window-controls {
@@ -121,6 +130,7 @@
 
     .titlebar-section.right {
       flex-grow: 0;
+      flex-shrink: 0;
       background-color: var(--bg-card);
     }
   }
