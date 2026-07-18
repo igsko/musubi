@@ -19,12 +19,18 @@ export class DetailsState {
 
     try {
       const payload = await fetchEntryDetails(id);
+      // clear the card if the record does not exist in the new db
+      if(!payload) {
+        this.selectedEntry = null;
+        return;
+      }
       const entry = JSON.parse(payload.full_json);
       entry.pitch_accent = payload.pitch_accent;
       entry.id = id;
       this.selectedEntry = entry;
     } catch (error) {
       console.error('Error fetching entry details:', error);
+      this.selectedEntry = null;
     } finally {
       this.#loadingDetails = false;
     }

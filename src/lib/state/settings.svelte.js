@@ -180,6 +180,20 @@ class SettingsState {
 
       this.localDbVersion = await invoke('get_db_version');
       this.updateStatus = 'up-to-date';
+
+      // -- STALE STATE PREVENTION: ---
+      const {details, search} = await import('$lib/state.svelte.js');
+      if(details && details.selectedEntry) {
+        // refresh current word details card
+        const currentId = details.selectedEntry.id;
+        console.log(`[SettingsState] Hot-reloading active entry details for ID: ${currentId}`);
+        await details.selectWord(currentId);
+      }
+      if(search && search.query.trim().length > 0) {
+        // refresh current search suggestions list
+        console.log(`[SettingsState] Refreshing search suggestions for query: ${search.query}`);
+        await search.handleInput(true); // force immediate search
+      }
     } catch (error) {
       console.error("Error downloading or applying update:", error);
       this.updateStatus = 'error';
