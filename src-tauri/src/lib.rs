@@ -311,7 +311,26 @@ fn apply_database_update(
         }
 
         // rename the downloaded database to the active path
-        if let Err(e) = std::fs::rename(&temp_path, &db_path) {
+        // with retry loop for Windows Defender
+        let mut rename_error = None;
+        for attempt in 0..5 {
+            match std::fs::rename(&temp_path, &db_path) {
+                Ok(_) => {
+                    rename_error = None;
+                    break;
+                }
+                Err(e) => {
+                    rename_error = Some(e);
+                    // put the thread to sleep for 200ms
+                    if attempt < 4 {
+                        std::thread::sleep(std::time::Duration::from_millis(200));
+                    }
+                }
+            }
+        }
+
+        // if still failed after 5 tries, rollback
+        if let Some(e) = rename_error {
             // if rename failed, restore the backup
             if backup_path.exists() {
                 std::fs::rename(&backup_path, &db_path).ok();
