@@ -409,6 +409,17 @@ pub fn run() {
                 if !is_wsl {
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.set_decorations(true);
+
+                        // tauri bug workaround
+                        let _ = window.set_resizable(false);
+                        let _ = window.set_resizable(true);
+                        let window_clone = window.clone();
+                        window.on_window_event(move |event| {
+                            if let tauri::WindowEvent::Focused(true) = event {
+                                let _ = window_clone.set_resizable(false);
+                                let _ = window_clone.set_resizable(true);
+                            }
+                        });
                     }
                 }
             }

@@ -107,13 +107,34 @@
     {/if}
 
   {:else if search.loading && search.query.trim().length > 0}
-    <!-- Initial search query placeholder skeletons -->
+    <!-- initial search query placeholder skeletons -->
     {#each Array(6) as _, i}
       <li class="skeleton-item">
         <div class="skeleton-shimmer title-shimmer"></div>
         <div class="skeleton-shimmer body-shimmer"></div>
       </li>
     {/each}
+  {:else if search.query.trim().length === 0}
+    <!-- search empty, start searching helper -->
+    <div class="empty-list-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="state-icon">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <p class="state-title">Zacznij pisać, aby wyszukać</p>
+      <p class="state-desc">Wyszukuj wpisując słowa po polsku, japońsku (kanji/kana) lub w romaji.</p>
+    </div>
+
+  {:else if search.query.trim().length > 0 && search.suggestions.length === 0 && !search.loading}
+    <!--no results found -->
+    <div class="empty-list-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="state-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
+      <p class="state-title">Brak wyników</p>
+      <p class="state-desc">Nie znaleziono żadnych haseł pasujących do frazy „{search.query}”.</p>
+    </div>
   {/if}
 </ul>
 
@@ -428,6 +449,42 @@
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+
+/* ==========================================
+     EMPTY & NO-RESULTS STATES
+   ========================================== */
+  .empty-list-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+      flex-grow: 1;
+      height: 100%;
+      box-sizing: border-box;
+  }
+
+  .state-icon {
+      color: var(--border-main);
+      margin-bottom: 12px;
+  }
+
+  .state-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 0 0 6px 0;
+  }
+
+  .state-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 220px;
+      line-height: 1.4;
+  }
+
   /* mobile responsivity */
   @media (max-width: 600px) {
     .dropdown {

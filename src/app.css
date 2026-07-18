@@ -205,10 +205,10 @@ html.native-titlebar main.container.tauri-desktop {
 
 @media (min-width: 601px) {
     html.native-titlebar .search-section {
-        height: 48px !important;
+        height: 60px !important;
     }
     
     html.native-titlebar .panel-header {
-        height: 48px !important;
+        height: 60px !important;
     }
 }

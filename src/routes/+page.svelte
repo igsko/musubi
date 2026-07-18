@@ -14,6 +14,10 @@
   import { search, details, uiState, user, settings } from '$lib/state.svelte.js';
 
   onMount(async () => {
+    // Context menu blocking (release only)
+    if (import.meta.env.PROD) {
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
     const isWsl = await detectWsl();
     if(isLinux && !isWsl) {
       document.documentElement.classList.add('native-titlebar');
