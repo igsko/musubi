@@ -2,6 +2,8 @@
 
 // Detect if we're running in a Tauri environment or a web environment
 export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+// Detect if the OS is Linux
+export const isLinux = typeof navigator !== 'undefined' && /Linux/i.test(navigator.userAgent);
 
 /**
  * Wrapper to fetch suggestions based on the provided query and offset.
@@ -109,4 +111,21 @@ export async function closeWindow() {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
     getCurrentWindow().close();
   }
+}
+
+/**
+ * Checks if the app is working under WSL subsystem
+ * @returns {Promise<boolean>}
+ */
+export async function detectWsl() {
+  if (isTauri) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke('check_wsl');
+    } catch (e) {
+      console.error("Failed to detect WSL:", e);
+      return false;
+    }
+  }
+  return false;
 }

@@ -400,6 +400,19 @@ pub fn run() {
                 conn: Mutex::new(conn),
             });
 
+            #[cfg(target_os = "linux")]
+            {
+                let is_wsl = std::fs::read_to_string("/proc/sys/kernel/osrelease")
+                    .map(|s| s.to_lowercase().contains("microsoft") || s.to_lowercase().contains("wsl"))
+                    .unwrap_or(false);
+
+                if !is_wsl {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.set_decorations(true);
+                    }
+                }
+            }
+
             Ok(())
         })
         // Register commands that the frontend can call. Keep this list small and
@@ -409,10 +422,26 @@ pub fn run() {
             get_entry_details,
             get_multiple_entries,
             get_db_version,
-            apply_database_update
+            apply_database_update,
+            check_wsl
 
         ])
         // `generate_context!` reads the `tauri.conf.json` and embedded assets.
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+/// Checks if the app is ran in WSL environment
+#[tauri::command(async)]
+fn check_wsl() -> bool {
+    #[cfg(target_os = "linux")]
+    {
+        std::fs::read_to_string("/proc/sys/kernel/osrelease")
+            .map(|s| s.to_lowercase().contains("microsoft") || s.to_lowercase().contains("wsl"))
+            .unwrap_or(false)
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        false
+    }
 }

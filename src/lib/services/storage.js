@@ -51,5 +51,5 @@ export async function saveValue(key, value) {
 export async function getValue(key, defaultValue = null) {
   const store = await getStore();
   const val = await store.get(key);
-  return val !== null ? val : defaultValue;
+  return (val !== null && val !== undefined) ? val : defaultValue;
 }

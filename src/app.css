@@ -190,3 +190,25 @@ main.container.tauri-desktop {
         display: contents !important;
     }
 }
+
+/* ==========================================
+   LINUX NATIVE TITLEBAR OVERRIDES
+   ========================================== */
+html.native-titlebar .custom-titlebar {
+    display: none !important;
+}
+
+html.native-titlebar main.container,
+html.native-titlebar main.container.tauri-desktop {
+    height: 100vh !important;
+}
+
+@media (min-width: 601px) {
+    html.native-titlebar .search-section {
+        height: 48px !important;
+    }
+    
+    html.native-titlebar .panel-header {
+        height: 48px !important;
+    }
+}

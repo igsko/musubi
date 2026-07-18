@@ -2,7 +2,7 @@
   // @ts-nocheck
   import { onMount } from 'svelte';
 
-  import {isTauri} from '$lib/services/platform.js';
+  import {isTauri, isLinux, detectWsl} from '$lib/services/platform.js';
   import Titlebar from '$lib/components/Titlebar.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
@@ -14,6 +14,10 @@
   import { search, details, uiState, user, settings } from '$lib/state.svelte.js';
 
   onMount(async () => {
+    const isWsl = await detectWsl();
+    if(isLinux && !isWsl) {
+      document.documentElement.classList.add('native-titlebar');
+    }
     try {
       // Load and restore user and settings state from local storage
       await Promise.all([
