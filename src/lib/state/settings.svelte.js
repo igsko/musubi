@@ -92,19 +92,29 @@ class SettingsState {
   applyTheme() {
     if (typeof document === 'undefined') return;
     const html = document.documentElement;
+    let isDark = false;
 
     if (this.theme === 'dark') {
       html.classList.add('dark');
+      isDark = true;
     } else if (this.theme === 'light') {
       html.classList.remove('dark');
+      isDark = false;
     } else {
       // system theme
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (prefersDark) {
         html.classList.add('dark');
+        isDark = true;
       } else {
         html.classList.remove('dark');
+        isDark = false;
       }
+    }
+
+    // dynamically update status bar icons on Android
+    if (typeof window !== 'undefined' && window.AndroidStatusBar) {
+      window.AndroidStatusBar.setStatusBarTheme(isDark);
     }
   }
 
