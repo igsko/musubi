@@ -10,3 +10,12 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 src-tauri/resources/dictionary.db
 *.xml
+
+**/gen/android/local.properties
+**/gen/android/keystore.properties
+**/gen/android/**/build/
+**/gen/android/build/
+**/gen/android/.gradle/
+**/gen/android/.idea/
+**/gen/android/*.jks
+**/gen/android/*.keystore
