@@ -36,7 +36,9 @@
   --header-height: 44px;
 }
 
-/* Global Body Styling */
+/* ==========================================
+   GLOBAL BODY STYLING, TYPOGRAPHY, FONT STACK
+   ========================================== */
 body {
     margin: 0;
     display: flex;
@@ -48,18 +50,24 @@ body {
     color: var(--text-main);
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 
+                 "Segoe UI", "Roboto", "Cantarell", "Noto Sans", "Helvetica Neue", 
+                 "BIZ UDPGothic", "Yu Gothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", 
+                 "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", 
+                 sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 /* Japanese text styling */
 :lang(ja), .japanese-text {
-  font-family: -apple-system, BlinkMacSystemFont, 
-               "Segoe UI", Roboto, "Helvetica Neue", 
-               "Hiragino Sans", "Hiragino Kaku Gothic ProN", /* macOS */
-               "BIZ UDPGothic", "Yu Gothic", "Meiryo",        /* Windows */
-               "Noto Sans JP",                               /* Linux / Fallback */
-               sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-family: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    word-break: break-all;
+    line-break: strict;
 }
 
 /* Global Button Reset */
@@ -212,5 +220,39 @@ html.native-titlebar main.container.tauri-desktop {
     
     html.native-titlebar .panel-header {
         height: 60px !important;
+    }
+}
+
+/* ==========================================
+   MOBILE PLATFORM SCALING & TOUCH TARGETS
+   ========================================== */
+@media (max-width: 600px) {
+    /* Skalowanie bazy czcionek wyzwala się wyłącznie na urządzeniach mobilnych */
+    html.mobile-platform {
+        font-size: 18px !important;
+    }
+
+    html.mobile-platform .search-box {
+        font-size: 1rem !important;
+    }
+
+    /* Powiększenie stref dotykowych menu bocznego wyłącznie dla kciuka na telefonie */
+    html.mobile-platform .menu-dropdown {
+        width: 210px !important;
+    }
+
+    html.mobile-platform .menu-item {
+        padding: 12px 20px !important;
+        font-size: 1rem !important;
+    }
+
+    html.mobile-platform .menu-icon-svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
+    html.mobile-platform .clear-btn, 
+    html.mobile-platform .search-icon-svg {
+        right: 18px !important;
     }
 }

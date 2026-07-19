@@ -2,7 +2,7 @@
   // @ts-nocheck
   import { onMount } from 'svelte';
 
-  import {isTauri, isLinux, detectWsl} from '$lib/services/platform.js';
+  import {isTauri, isLinux, detectWsl, isMobile} from '$lib/services/platform.js';
   import Titlebar from '$lib/components/Titlebar.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
@@ -18,10 +18,16 @@
     if (import.meta.env.PROD) {
       document.addEventListener('contextmenu', (e) => e.preventDefault());
     }
+
+    if(isMobile) {
+      document.documentElement.classList.add('mobile-platform');
+    }
+
     const isWsl = await detectWsl();
     if(isLinux && !isWsl) {
       document.documentElement.classList.add('native-titlebar');
     }
+
     try {
       // Load and restore user and settings state from local storage
       await Promise.all([

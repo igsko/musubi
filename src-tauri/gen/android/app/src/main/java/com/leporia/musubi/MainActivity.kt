@@ -1,4 +1,4 @@
-package com.leporia.dictionary
+package com.leporia.musubi
 
 import android.os.Bundle
 import android.webkit.WebView

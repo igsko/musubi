@@ -1,5 +1,5 @@
 {
-  "name": "dictionary",
+  "name": "musubi",
   "version": "0.1.0",
   "description": "",
   "type": "module",
@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build:all": "npx tauri build && npx tauri build --target x86_64-pc-windows-msvc --bundles nsis --runner cargo-xwin"
   },
   "license": "MIT",
   "dependencies": {

@@ -4,6 +4,8 @@
 export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 // Detect if the OS is Linux
 export const isLinux = typeof navigator !== 'undefined' && /Linux/i.test(navigator.userAgent);
+// Detect if the device running is a phone/tablet
+export const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 /**
  * Wrapper to fetch suggestions based on the provided query and offset.

@@ -7,7 +7,7 @@
 -->
 <div class="custom-titlebar" data-tauri-drag-region>
   <div class="titlebar-section left" data-tauri-drag-region>
-    <div class="app-title" data-tauri-drag-region>Słownik Japońsko-Polski</div>
+    <div class="app-title" data-tauri-drag-region>Musubi</div>
   </div>
 
   <div class="titlebar-section right">
