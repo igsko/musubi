@@ -1,16 +1,22 @@
-.DS_Store
+# Node.js & package managers
 node_modules
+/package
+
+# sveltekit & vite build options
 /build
 /.svelte-kit
-/package
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Environment secrets and config
 .env
 .env.*
 !.env.example
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
-src-tauri/resources/dictionary.db
-*.xml
 
+# Local db
+src-tauri/resources/dictionary.db
+
+# Android development  & signing keys
 **/gen/android/local.properties
 **/gen/android/keystore.properties
 **/gen/android/**/build/
@@ -19,3 +25,31 @@ src-tauri/resources/dictionary.db
 **/gen/android/.idea/
 **/gen/android/*.jks
 **/gen/android/*.keystore
+
+# IDEs and editors
+/.idea/
+/.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.Spellchecker/
+.DS_Store
+*Zone.Identifier
+
+# General
+*.xml
