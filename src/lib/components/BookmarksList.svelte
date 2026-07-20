@@ -4,6 +4,7 @@
   import { segmentFurigana } from "$lib/utils/furigana.js";
   import { fetchMultipleEntries } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
+  import { goto } from "$app/navigation";
   import SidePanel from "$lib/components/SidePanel.svelte";
 
   let loadedEntries = $state([]);
@@ -75,7 +76,7 @@
     uiState.returnView = 'bookmarks';
     details.selectWord(id);
     user.addToHistory(id);
-    uiState.currentView = "details";
+    goto('/');
   }
 
   function handleKeyDown(id, event) {
@@ -91,7 +92,11 @@
   }
 </script>
 
-<SidePanel title="Zakładki" onClose={() => uiState.closeSettings()}>
+<SidePanel title="Zakładki" onClose={() => {
+  details.restore();             // restore the original search word from memory
+  uiState.returnView = 'search'; // reset navigation state back to the main search view
+  goto('/');                     // navigate to home route to render the restored detail
+}}>
   {#if loading && loadedEntries.length === 0}
     <div class="status-message">Ładowanie zakładek...</div>
   {:else if loadedEntries.length === 0}

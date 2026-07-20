@@ -16,9 +16,18 @@ export const user = new UserState();
 export const uiState = new UIState();
 export const settings = settingsState;
 
+/**
+ * Programmatically navigates to a specific dictionary entry by its keyword.
+ * Commonly used for parsing and executing "See also" cross-references.
+ * 
+ * @param {string} keyword - The keyword to navigate to.
+ * @returns {Promise<void>}
+ */
 export async function goToWord(keyword) {
-    // Update the search box UI so the user knows where they navigated to
-    // search.query = keyword;
+    // Clear any suspended details from memory since the user is starting a brand new query.
+    details.clearSuspension();
+
+    // Close the currently viewed word to trigger a clean transition/loading state.
     details.close();
 
     try {
@@ -31,7 +40,7 @@ export async function goToWord(keyword) {
             await details.selectWord(topId);
             await user.addToHistory(topId);
             uiState.returnView = 'search';
-            search.clear(); // Close the suggestions list
+            search.clear(); // close the suggestions list
         } else {
             search.suggestions = results;
         }
@@ -40,20 +49,19 @@ export async function goToWord(keyword) {
     }
 }
 
-export function goBack() {
+export async function goBack() {
+    const { goto } = await import('$app/navigation');
     // switch side view back to the list user navigated from
-    if (uiState.returnView === 'bookmarks') {
-        uiState.currentView = 'bookmarks';
-    } else if (uiState.returnView === 'history') {
-        uiState.currentView = 'history';
-    } else {
-        uiState.currentView = 'details';
-    }
-
+    const targetView = uiState.returnView;
     details.close();
 
-    // Re-fetches the active search suggestions list only if returning to the main screen
-    if(uiState.returnView === 'search') {
-        search.handleInput();
+    // change the URL path based on place of origin
+    if (targetView === 'bookmarks') {
+        await goto('/bookmarks');
+    } else if (targetView === 'history') {
+        await goto('/history');
+    } else {
+        await goto('/');
+        search.handleInput(); // refresh search when returning to the browser
     }
 }

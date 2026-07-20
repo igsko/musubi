@@ -1,12 +1,14 @@
 <script>
   // @ts-nocheck
-  import { search, uiState } from '$lib/state.svelte.js';
+  import { details, search, uiState } from '$lib/state.svelte.js';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   let inputEl;
 
   function clearSearch() {
     search.query = '';
-    if(uiState.currentView === 'settings') {
-      uiState.closeSettings();
+    if ($page.url.pathname !== '/') {
+      goto('/');
     }
     search.handleInput();
     inputEl?.focus();
@@ -19,12 +21,19 @@
   ];
 
   function handleMenuAction(optionId) {
+    uiState.menuOpen = false; // close the dropdown hamburger menu
+
+    // if menu gets opened while on main search, freeze the word
+    if(uiState.returnView === 'search') {
+      details.suspend();
+    }
+
     if(optionId === 'settings') {
-      uiState.openSettings();
+      goto('/settings');
     } else if (optionId === 'bookmarks') {
-      uiState.openBookmarks();
+      goto('/bookmarks');
     } else if (optionId === 'history') {
-      uiState.openHistory();
+      goto('/history');
     }
   }
 </script>

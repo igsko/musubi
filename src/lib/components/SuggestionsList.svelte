@@ -2,6 +2,7 @@
   //@ts-nocheck
   import { search, details, user, uiState, settings } from '$lib/state.svelte.js';
   import { segmentFurigana } from '$lib/utils/furigana.js';
+  import { goto } from '$app/navigation';
 
   function getFrequencyMilestone(rank) {
     if (!rank) return null;
@@ -45,9 +46,11 @@
           () => {
             search.selectedIndex = idx; // synchronize index
 
-            // switch view and clear list instantly
-            uiState.closeSettings();           
+            // switch view and clear list instantly         
             uiState.returnView = 'search';
+
+            // clear any suspended details from memory as user opened a new word from main search
+            details.clearSuspension(); 
 
             details.selectWord(sug.id).catch(err => {
               console.error("Failed to load entry details:", err);
@@ -55,6 +58,7 @@
             user.addToHistory(sug.id).catch(err => {
               console.error("Failed to add entry to history:", err);
             });
+            goto('/');
           }} 
           class="suggestion-btn"
         >

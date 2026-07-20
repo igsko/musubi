@@ -6,6 +6,7 @@ import {fetchEntryDetails} from '$lib/services/platform.js';
  */
 export class DetailsState {
   selectedEntry = $state(null);
+  suspendedEntry = null;
   #loadingDetails = false;
 
   /**
@@ -36,7 +37,36 @@ export class DetailsState {
     }
   }
 
+  /**
+   * Close the details view by clearing the currently selected entry.
+   */
   close() {
     this.selectedEntry = null;
+  }
+
+  /**
+   * Suspends the current active word card so it can be restored later
+   */
+  suspend() {
+    if (this.selectedEntry) {
+      this.suspendedEntry = this.selectedEntry;
+    }
+  }
+
+  /**
+   * Restores the suspended word card to active state
+   */
+  restore() {
+    if (this.suspendedEntry) {
+      this.selectedEntry = this.suspendedEntry;
+      this.suspendedEntry = null; // clear storage post-restore
+    }
+  }
+
+  /**
+   * Clears the suspended entry (used when starting a completely new search)
+   */
+  clearSuspension() {
+    this.suspendedEntry = null;
   }
 }

@@ -1,10 +1,11 @@
 <script>
   //@ts-nocheck
-  import { uiState, settings } from "$lib/state.svelte.js";
+  import { goto } from '$app/navigation'; // import
+  import { settings } from "$lib/state.svelte.js";
   import SidePanel from "$lib/components/SidePanel.svelte";
 </script>
 
-<SidePanel title="Ustawienia" onClose={() => uiState.closeSettings()}>
+<SidePanel title="Ustawienia" onClose={() => goto('/')}>
   <!-- appearance -->
   <div class="settings-group">
     <h3 class="group-title">Wygląd interfejsu</h3>

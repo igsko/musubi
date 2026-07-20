@@ -4,6 +4,7 @@
   import { segmentFurigana } from "$lib/utils/furigana.js";
   import { fetchMultipleEntries } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
+  import { goto } from "$app/navigation";
   import SidePanel from "$lib/components/SidePanel.svelte";
 
   let loadedEntries = $state([]);
@@ -74,7 +75,7 @@
   function selectEntry(id) {
     uiState.returnView = 'history';
     details.selectWord(id);
-    uiState.currentView = 'details';
+    goto('/');
   }
 
   function handleKeyDown(id, event) {
@@ -108,7 +109,11 @@
   {/if}
 {/snippet}
 
-<SidePanel title="Historia" {headerControls} onClose={() => uiState.closeSettings()}>
+<SidePanel title="Historia" {headerControls} onClose={() => {
+  details.restore();             // restore the original search word from memory
+  uiState.returnView = 'search'; // reset navigation state back to the main search view
+  goto('/');                     // navigate to home route to render the restored detail
+}}>
   {#if loading && loadedEntries.length === 0}
     <div class="status-message">Ładowanie historii...</div>
   {:else if loadedEntries.length === 0}
