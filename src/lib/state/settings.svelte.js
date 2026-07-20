@@ -1,5 +1,6 @@
 //@ts-nocheck
 import {getValue, saveValue, STORAGE_KEYS} from '$lib/services/storage.js';
+import { fetchLatestReleaseInfo } from '$lib/services/updater';
 
 class SettingsState {
   localDbVersion = $state('unknown');
@@ -142,19 +143,12 @@ class SettingsState {
     this.updateStatus = 'checking';
     try {
       const repo = "igsko/jp-pl-dictionary-compiler";
-      const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`);
-      if (!response.ok) throw new Error(`failed to fetch update info: ${response.status}`);
+      const info = await fetchLatestReleaseInfo(repo);
 
-      const latestRelease = await response.json();
-      const latestTag = latestRelease.tag_name; // "v20260506"
+      this.updateDownloadURL = info.downloadUrl;
+      this.updateVersion = info.version;
 
-      const dbAsset = latestRelease.assets.find(asset => asset.name.endsWith('.db'));
-      if (!dbAsset) throw new Error("No database asset found in the latest release.");
-
-      this.updateDownloadURL = dbAsset.browser_download_url;
-      this.updateVersion = latestTag.replace(/^v/, ''); // clean version string without 'v' prefix
-
-      if (this.updateVersion !== this.localDbVersion) {
+      if (this.updateVersion > this.localDbVersion) {
         this.updateStatus = 'available';
       } else {
         this.updateStatus = 'up-to-date';
@@ -171,24 +165,15 @@ class SettingsState {
     this.totalBytes = 0;
     this.downloadSpeed = 0;
 
-    let unlistenProgress;
-
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const { listen } = await import('@tauri-apps/api/event');
-
-      // register the event listener during the download lifecycle
-      unlistenProgress = await listen('download-progress', (event) => {
-        const { downloaded, total, speed } = event.payload;
-        this.downloadedBytes = downloaded;
-        this.totalBytes = total;
-        this.downloadSpeed = speed;
+      // call the service and pass a callback to update reactive state variables
+      const newVersion = await applyDatabaseUpdate(this.updateDownloadURL, (progress) => {
+        this.downloadedBytes = progress.downloaded;
+        this.totalBytes = progress.total;
+        this.downloadSpeed = progress.speed;
       });
 
-      // rust ureq handles download, file swap and db reopen
-      await invoke('apply_database_update', {url: this.updateDownloadURL});
-
-      this.localDbVersion = await invoke('get_db_version');
+      this.localDbVersion = newVersion;
       this.updateStatus = 'up-to-date';
 
       // -- STALE STATE PREVENTION: ---
@@ -207,9 +192,6 @@ class SettingsState {
     } catch (error) {
       console.error("Error downloading or applying update:", error);
       this.updateStatus = 'error';
-    } finally {
-      // clean up the event listener
-      if(unlistenProgress) unlistenProgress();
     }
   }
 }
