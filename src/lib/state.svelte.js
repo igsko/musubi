@@ -37,10 +37,12 @@ export async function goToWord(keyword) {
 
         if (results.length > 0) {
             const topId = results[0].id;
-            await details.selectWord(topId);
             await user.addToHistory(topId);
             uiState.returnView = 'search';
             search.clear(); // close the suggestions list
+
+            const {goto} = await import('$app/navigation');
+            await goto(`/entry/${topId}`);
         } else {
             search.suggestions = results;
         }

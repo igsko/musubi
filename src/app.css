@@ -101,6 +101,7 @@ main.container.tauri-desktop {
     user-select: none;
     padding: 8px 8px 0px 8px;
     margin-bottom: 8px;
+    border-right: 1px solid var(--border-main);
 }
 
 .view-section {

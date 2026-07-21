@@ -18,8 +18,10 @@ export class DetailsState {
     if (this.#loadingDetails) return;
     this.#loadingDetails = true;
 
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+
     try {
-      const payload = await fetchEntryDetails(id);
+      const payload = await fetchEntryDetails(numericId);
       // clear the card if the record does not exist in the new db
       if(!payload) {
         this.selectedEntry = null;
@@ -27,7 +29,7 @@ export class DetailsState {
       }
       const entry = JSON.parse(payload.full_json);
       entry.pitch_accent = payload.pitch_accent;
-      entry.id = id;
+      entry.id = numericId;
       this.selectedEntry = entry;
     } catch (error) {
       console.error('Error fetching entry details:', error);
@@ -53,14 +55,19 @@ export class DetailsState {
     }
   }
 
-  /**
-   * Restores the suspended word card to active state
+/**
+   * Restores the suspended word card to active state.
+   * Returns the restored entry's ID so SvelteKit can handle the redirect.
+   * @returns {string|null}
    */
   restore() {
     if (this.suspendedEntry) {
       this.selectedEntry = this.suspendedEntry;
+      const restoredId = this.suspendedEntry.id;
       this.suspendedEntry = null; // clear storage post-restore
+      return restoredId;
     }
+    return null;
   }
 
   /**

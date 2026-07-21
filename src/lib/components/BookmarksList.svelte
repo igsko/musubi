@@ -74,9 +74,8 @@
 
   function selectEntry(id) {
     uiState.returnView = 'bookmarks';
-    details.selectWord(id);
     user.addToHistory(id);
-    goto('/');
+    goto(`/entry/${id}`); 
   }
 
   function handleKeyDown(id, event) {
@@ -93,9 +92,14 @@
 </script>
 
 <SidePanel title="Zakładki" onClose={() => {
-  details.restore();             // restore the original search word from memory
-  uiState.returnView = 'search'; // reset navigation state back to the main search view
-  goto('/');                     // navigate to home route to render the restored detail
+  const restoredId = details.restore(); // restore the original word from memory and grab the ID
+  uiState.returnView = 'search';        // reset navigation state back to the main search view
+
+  if (restoredId) {
+    goto(`/entry/${restoredId}`);
+  } else {
+    goto('/');
+  }
 }}>
   {#if loading && loadedEntries.length === 0}
     <div class="status-message">Ładowanie zakładek...</div>

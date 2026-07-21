@@ -52,13 +52,7 @@
             // clear any suspended details from memory as user opened a new word from main search
             details.clearSuspension(); 
 
-            details.selectWord(sug.id).catch(err => {
-              console.error("Failed to load entry details:", err);
-            });
-            user.addToHistory(sug.id).catch(err => {
-              console.error("Failed to add entry to history:", err);
-            });
-            goto('/');
+            goto(`/entry/${sug.id}`); 
           }} 
           class="suggestion-btn"
         >
