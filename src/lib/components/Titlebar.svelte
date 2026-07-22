@@ -47,6 +47,7 @@
       user-select: none;
       border-bottom: 1px solid var(--border-main);
       box-sizing: border-box;
+      background-color: var(--bg-sidebar);
   }
 
   .titlebar-section {
@@ -59,7 +60,8 @@
 
   .titlebar-section.left {
       width: 360px;
-      background-color: var(--bg-card);
+      flex-shrink: 0;
+      background-color: var(--bg-sidebar);
       align-items: center;
       padding-left: 12px;
       padding-right: 8px;
@@ -70,7 +72,7 @@
   .titlebar-section.right {
       flex-grow: 1;
       flex-shrink: 0;
-      background-color: var(--bg-card);
+      background-color: var(--bg-sidebar);
       justify-content: flex-end;
       align-items: stretch;
   }

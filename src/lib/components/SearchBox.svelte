@@ -128,7 +128,7 @@
     <!-- floating dropdown menu -->
     <div class="menu-dropdown">
       {#each menuOptions as option}
-        {const isSettings = option.id === 'settings'}
+        {@const isSettings = option.id === 'settings'}
         
         <button 
           class="menu-item" 
@@ -165,6 +165,7 @@
     gap: 12px;
     position: relative;
     width: 100%;
+    flex-wrap: nowrap;
   }
 
   .hamburger-btn {
@@ -190,6 +191,7 @@
 
   .search-box-container {
       flex: 1;
+      min-width: 0;
       position: relative;
       border: 1px solid var(--border-main);
       box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);

@@ -151,9 +151,9 @@
         </div>
       {:else if settings.updateStatus === 'error'}
         <p class="error-text">Błąd połączenia. Sprawdź dostęp do sieci i spróbuj ponownie.</p>
-        <button class="onboarding-btn download-btn" onclick={initializeDatabase}>Spróbuj ponownie</button>
+        <button class="onboarding-btn download-btn" onclick={() => settings.downloadAndApplyUpdate()}>Spróbuj ponownie</button>
       {:else}
-        <button class="onboarding-btn download-btn" onclick={initializeDatabase}>
+        <button class="onboarding-btn download-btn" onclick={() => settings.downloadAndApplyUpdate()}>
           Pobierz bazę danych haseł
         </button>
       {/if}
