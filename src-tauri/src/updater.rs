@@ -1,3 +1,6 @@
+// This file handles dictionary database updates and hot-swapping procedures.
+// It manages HTTP download streaming, tracks IPC progress metrics, and handles safe SQLite connection swaps with automatic rollback on failure.
+
 use crate::db::DbState;
 use crate::models::ProgressPayload;
 use rusqlite::Connection;

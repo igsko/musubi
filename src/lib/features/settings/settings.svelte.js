@@ -1,8 +1,8 @@
 //@ts-nocheck
 import {getValue, saveValue, STORAGE_KEYS} from '$lib/services/storage.js';
-import { fetchLatestReleaseInfo } from '$lib/services/updater';
+import { fetchLatestReleaseInfo, applyDatabaseUpdate } from '$lib/services/updater';
 
-class SettingsState {
+export class SettingsState {
   localDbVersion = $state('unknown');
   updateStatus = $state('idle'); // 'idle', 'checking', 'available', 'downloading', 'up-to-date', 'error'
   updateVersion = $state('');
@@ -195,5 +195,3 @@ class SettingsState {
     }
   }
 }
-
-export const settingsState = new SettingsState();

@@ -1,3 +1,6 @@
+// This file defines data transfer objects (DTOs) and payload structures.
+// These structs represent database query results, search suggestions, and update progress metrics serialized over Tauri IPC.
+
 use serde::{Deserialize, Serialize};
 
 // Progress metrics payload sent over IPC during database update downloads

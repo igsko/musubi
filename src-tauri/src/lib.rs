@@ -1,7 +1,5 @@
-// External crates used by this Tauri backend.
-// - `tauri` provides the application runtime, command handling, and path resolution APIs.
-// - `rusqlite` is a lightweight SQLite binding used to open and query the packaged database.
-// - `serde` is used to (de)serialize Rust structs to/from JSON when communicating with the frontend.
+// This file serves as the main library root and application setup hub.
+// It initializes SQLite database state, configures platform-specific window behavior, and registers Tauri IPC commands.
 
 mod commands;
 mod db;
@@ -73,11 +71,11 @@ pub fn run() {
         // Register commands that the frontend can call. Keep this list small and
         // stable; adding commands changes the API surface exposed to the renderer.
         .invoke_handler(tauri::generate_handler![
-            commands::get_suggestions, 
-            commands::get_entry_details,
-            commands::get_multiple_entries,
-            commands::get_db_version,
-            commands::check_wsl,
+            commands::entries::get_suggestions, 
+            commands::entries::get_entry_details,
+            commands::entries::get_multiple_entries,
+            commands::system::get_db_version,
+            commands::system::check_wsl,
             updater::apply_database_update,
         ])
         // `generate_context!` reads the `tauri.conf.json` and embedded assets.

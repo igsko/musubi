@@ -1,7 +1,7 @@
 <script>
   //@ts-nocheck
   import { search, details, user, uiState, settings } from '$lib/state';
-  import { segmentFurigana } from '$lib/features/entry/furigana.js';
+  import { segmentFurigana } from '$lib/utils/furigana.js';
   import { goto } from '$app/navigation';
 
   function getFrequencyMilestone(rank) {

@@ -5,14 +5,14 @@
 import { SearchState } from '$lib/features/search/search.svelte.js';
 import { DetailsState } from '$lib/features/entry/details.svelte.js';
 import { UserState } from '$lib/features/user/user.svelte.js';
-import { settingsState } from '$lib/features/settings/settings.svelte.js';
+import { SettingsState } from '$lib/features/settings/settings.svelte.js';
 import { UIState } from '$lib/features/layout/ui.svelte.js';
 
 export const search = new SearchState();
 export const details = new DetailsState();
 export const user = new UserState();
 export const uiState = new UIState();
-export const settings = settingsState;
+export const settings = new SettingsState();
 
 /**
  * Programmatically navigates to a specific dictionary entry by its keyword.
