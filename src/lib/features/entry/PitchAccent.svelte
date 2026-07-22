@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import { parsePitchAccent } from "$lib/utils/pitch.js";
+  import { parsePitchAccent } from "$lib/features/entry/pitch.js";
 
   let { pitch } = $props();
 

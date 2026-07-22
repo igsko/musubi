@@ -2,7 +2,7 @@
   //@ts-nocheck
   import { goto } from '$app/navigation'; // import
   import { settings } from '$lib/state';
-  import SidePanel from "$lib/components/SidePanel.svelte";
+  import SidePanel from "$lib/features/layout/SidePanel.svelte";
 </script>
 
 <SidePanel title="Ustawienia" onClose={() => goto('/')}>

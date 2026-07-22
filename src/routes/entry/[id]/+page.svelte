@@ -2,9 +2,9 @@
   //@ts-nocheck
   import { page } from '$app/stores'; // store to access active route parameters
   import {details, user, goBack, goToWord, settings, uiState} from '$lib/state'; // import state and actions
-  import { segmentFurigana } from '$lib/utils/furigana.js';
-  import { splitJapanese } from '$lib/utils/japanese.js';
-  import PitchAccent from '$lib/components/PitchAccent.svelte';
+  import { segmentFurigana } from '$lib/features/entry/furigana.js';
+  import { splitJapanese } from '$lib/features/entry/japanese.js';
+  import PitchAccent from '$lib/features/entry/PitchAccent.svelte';
 
   // Reactively fetch new word details from SQLite whenever the URL [id] changes
   $effect(() => {

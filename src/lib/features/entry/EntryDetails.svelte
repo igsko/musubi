@@ -1,9 +1,9 @@
 <script>
   // @ts-nocheck
   import {details, user, goBack, goToWord, settings, uiState} from '$lib/state'; // import state and actions
-  import { segmentFurigana } from '$lib/utils/furigana.js';
-  import { splitJapanese } from '$lib/utils/japanese.js';
-  import PitchAccent from '$lib/components/PitchAccent.svelte';
+  import { segmentFurigana } from '$lib/features/entry/furigana.js';
+  import { splitJapanese } from '$lib/features/entry/japanese.js';
+  import PitchAccent from '$lib/features/entry/PitchAccent.svelte';
 
   const POS_KEYWORDS = [
     'rzeczownik', 'czasownik', 'przymiotnik', 'przysłówek', 'zaimek', 

@@ -4,9 +4,9 @@
   import '../app.css';
 
   import { isTauri, isLinux, detectWsl, isMobile } from '$lib/services/platform.js';
-  import Titlebar from '$lib/components/Titlebar.svelte';
-  import SearchBox from '$lib/components/SearchBox.svelte';
-  import SuggestionsList from '$lib/components/SuggestionsList.svelte';
+  import Titlebar from '$lib/features/layout/Titlebar.svelte';
+  import SearchBox from '$lib/features/search/SearchBox.svelte';
+  import SuggestionsList from '$lib/features/search/SuggestionsList.svelte';
   import { search, details, user, settings } from '$lib/state';
   import { page } from '$app/stores'; // reactive store monitoring active URL path
 

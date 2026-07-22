@@ -2,11 +2,11 @@
 // aggregating the search, details, and user states into a single exportable object.
 // It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
 
-import { SearchState } from '$lib/state/search.svelte.js';
-import { DetailsState } from '$lib/state/details.svelte.js';
-import { UserState } from '$lib/state/user.svelte.js';
-import { settingsState } from '$lib/state/settings.svelte.js';
-import { UIState } from '$lib/state/ui.svelte.js';
+import { SearchState } from '$lib/features/search/search.svelte.js';
+import { DetailsState } from '$lib/features/entry/details.svelte.js';
+import { UserState } from '$lib/features/user/user.svelte.js';
+import { settingsState } from '$lib/features/settings/settings.svelte.js';
+import { UIState } from '$lib/features/layout/ui.svelte.js';
 
 export const search = new SearchState();
 export const details = new DetailsState();
