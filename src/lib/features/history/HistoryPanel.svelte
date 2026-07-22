@@ -5,7 +5,7 @@
   import { safeParseEntry } from "$lib/utils/japanese";
   import { goto } from "$app/navigation";
   import SidePanel from "$lib/features/layout/SidePanel.svelte";
-  import EntryListItem from "$lib/components/EntryListItem.svelte";
+  import EntryListItem from "$lib/components/common/EntryListItem.svelte";
 
   let loadedEntries = $state([]);
   let loading = $state(false);

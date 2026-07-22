@@ -10,7 +10,9 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
     "tauri": "tauri",
-    "build:all": "npx tauri build && npx tauri build --target x86_64-pc-windows-msvc --bundles nsis --runner cargo-xwin"
+    "build:host": "tauri build",
+    "build:win": "npm run build && tauri build --target x86_64-pc-windows-msvc --bundles nsis --runner cargo-xwin",
+    "build:all": "npm run build && npm run build:host && npm run build:win"
   },
   "license": "MIT",
   "dependencies": {
