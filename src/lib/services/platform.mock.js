@@ -97,3 +97,25 @@ export async function detectWsl() {
   console.log("[Platform Service] Mock detectWsl (No-op in browser)");
   return false;
 }
+
+export async function getDbVersion() {
+  console.log("[Platform Service] Mocking getDbVersion");
+  return "1.0.0-mock";
+}
+
+export async function applyDatabaseUpdate(downloadUrl, onProgress) {
+  console.log(`[Platform Service] Mocking applyDatabaseUpdate for URL: ${downloadUrl}`);
+
+  // Simulate progress steps for front-end preview testing
+  const total = 10_000_000;
+  for (let step = 1; step <= 10; step++) {
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    onProgress?.({
+      downloaded: (total / 10) * step,
+      total,
+      speed: 1_200_000
+    });
+  }
+
+  return "2026.07.02-mock";
+}

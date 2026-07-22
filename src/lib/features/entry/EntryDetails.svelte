@@ -1,9 +1,14 @@
 <script>
   // @ts-nocheck
   import {details, user, goBack, goToWord, settings, uiState} from '$lib/state'; // import state and actions
-  import { segmentFurigana } from '$lib/utils/furigana.js';
-  import { splitJapanese } from '$lib/utils/japanese.js';
-  import { parseSeeAlso, isPartOfSpeechTag, isCategory, cleanPartsOfSpeech } from '$lib/utils/japanese/parser.js';
+  import { 
+    segmentFurigana, 
+    splitJapanese, 
+    parseSeeAlso, 
+    isPartOfSpeechTag, 
+    isCategory, 
+    cleanPartsOfSpeech 
+  } from '$lib/utils/japanese';
   import PitchAccent from '$lib/features/entry/PitchAccent.svelte';
 
   // reactively compute the primary headword whenever selectedEntry changes

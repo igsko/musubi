@@ -17,3 +17,5 @@ export const minimizeWindow = driver.minimizeWindow;
 export const toggleMaximizeWindow = driver.toggleMaximizeWindow;
 export const closeWindow = driver.closeWindow;
 export const detectWsl = driver.detectWsl;
+export const getDbVersion = driver.getDbVersion;
+export const applyDatabaseUpdate = driver.applyDatabaseUpdate;

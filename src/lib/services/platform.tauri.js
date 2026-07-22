@@ -38,3 +38,28 @@ export async function detectWsl() {
   const { invoke } = await import('@tauri-apps/api/core');
   return await invoke('check_wsl');
 }
+
+export async function getDbVersion() {
+  const { invoke } = await import('@tauri-apps/api/core');
+  return await invoke('get_db_version');
+}
+
+export async function applyDatabaseUpdate(downloadUrl, onProgress) {
+  const { invoke } = await import('@tauri-apps/api/core');
+  const { listen } = await import('@tauri-apps/api/event');
+
+  let unlistenProgress;
+
+  try {
+    unlistenProgress = await listen('download-progress', (event) => {
+      onProgress?.(event.payload);
+    });
+
+    await invoke('apply_database_update', { url: downloadUrl });
+    return await invoke('get_db_version');
+  } finally {
+    if (unlistenProgress) {
+      unlistenProgress();
+    }
+  }
+}

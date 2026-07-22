@@ -1,10 +1,11 @@
+//@ts-nocheck
 // This file serves as a centralized state management module for the application, 
 // aggregating the search, details, and user states into a single exportable object.
 // It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
 
 import { SearchState } from '$lib/features/search/search.svelte.js';
 import { DetailsState } from '$lib/features/entry/details.svelte.js';
-import { UserState } from '$lib/features/user/user.svelte.js';
+import { UserState } from '$lib/state/user.svelte.js';
 import { SettingsState } from '$lib/features/settings/settings.svelte.js';
 import { UIState } from '$lib/features/layout/ui.svelte.js';
 
@@ -13,6 +14,18 @@ export const details = new DetailsState();
 export const user = new UserState();
 export const uiState = new UIState();
 export const settings = new SettingsState();
+
+settings.onDatabaseUpdate = async () => {
+    if (details.selectedEntry) {
+        const currentId = details.selectedEntry.id;
+        console.log(`[State Orchestration] Hot-reloading active entry details for ID: ${currentId}`);
+        await details.selectWord(currentId);
+    }
+    if (search.query.trim().length > 0) {
+        console.log(`[State Orchestration] Refreshing search suggestions for query: ${search.query}`);
+        await search.handleInput(true);
+    }
+};
 
 /**
  * Programmatically navigates to a specific dictionary entry by its keyword.

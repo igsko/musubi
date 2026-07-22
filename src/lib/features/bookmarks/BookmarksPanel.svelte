@@ -1,9 +1,8 @@
 <script>
   //@ts-nocheck
   import { user, details, uiState, settings } from '$lib/state';
-  import { segmentFurigana } from "$lib/utils/furigana.js";
+  import { segmentFurigana, splitJapanese, safeParseEntry } from '$lib/utils/japanese';
   import { fetchMultipleEntries } from "$lib/services/platform.js";
-  import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";
   import { goto } from "$app/navigation";
   import SidePanel from "$lib/features/layout/SidePanel.svelte";
 

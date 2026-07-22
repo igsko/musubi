@@ -1,4 +1,5 @@
 //@ts-nocheck
+import { getDbVersion } from '$lib/services/platform';
 import {getValue, saveValue, STORAGE_KEYS} from '$lib/services/storage.js';
 import { fetchLatestReleaseInfo, applyDatabaseUpdate } from '$lib/services/updater';
 
@@ -16,6 +17,9 @@ export class SettingsState {
   downloadedBytes = $state(0);
   totalBytes = $state(0);
   downloadSpeed = $state(0);
+
+  // callback hook for cross-state reactions after db hot-swap
+  onDatabaseUpdate = null;
 
   // svelte derived properties for automatic text formatting
   downloadedText = $derived(this.formatBytes(this.downloadedBytes));
@@ -46,8 +50,7 @@ export class SettingsState {
 
     // fetch current SQLite database version from the metadata table via rust
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      this.localDbVersion = await invoke('get_db_version');
+      this.localDbVersion = await getDbVersion();
     } catch (err) {
       console.error("Database is empty or uninitialized.", err);
       this.localDbVersion = 'uninitialized';
@@ -176,18 +179,8 @@ export class SettingsState {
       this.localDbVersion = newVersion;
       this.updateStatus = 'up-to-date';
 
-      // -- STALE STATE PREVENTION: ---
-      const {details, search} = await import('$lib/state');
-      if(details && details.selectedEntry) {
-        // refresh current word details card
-        const currentId = details.selectedEntry.id;
-        console.log(`[SettingsState] Hot-reloading active entry details for ID: ${currentId}`);
-        await details.selectWord(currentId);
-      }
-      if(search && search.query.trim().length > 0) {
-        // refresh current search suggestions list
-        console.log(`[SettingsState] Refreshing search suggestions for query: ${search.query}`);
-        await search.handleInput(true); // force immediate search
+      if (typeof this.onDatabaseUpdate === 'function') {
+        await this.onDatabaseUpdate();
       }
     } catch (error) {
       console.error("Error downloading or applying update:", error);
