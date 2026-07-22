@@ -99,8 +99,7 @@
     <svg 
       class="mizuhiki-rope-svg" 
       class:dragging={isDragging}
-      width={containerWidth} 
-      height={containerHeight}
+      viewBox="0 0 {containerWidth} {containerHeight}"
       aria-hidden="true"
     >
       <g fill="none" stroke-linecap="round" stroke-linejoin="round">

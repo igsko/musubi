@@ -13,6 +13,13 @@
   let { children } = $props();
 
   onMount(async () => {
+    // mitigate ResizeObserver warnings across the app
+    window.addEventListener('error', (e) => {
+      if (e.message && e.message.includes('ResizeObserver loop')) {
+        e.stopImmediatePropagation();
+      }
+    });
+    
     // Context menu blocking (release only)
     if (import.meta.env.PROD) {
       document.addEventListener('contextmenu', (e) => e.preventDefault());

@@ -20,12 +20,6 @@ function indexOfAny(str, charSet) {
  * @param {string} rawPitch 
  * @returns {Array<{text: string, isHigh: boolean, isDownstep: boolean}>}
  */
-pub_parse_pitch();
-
-function pub_parse_pitch() {
-  // Organizer wrapper
-}
-
 export function parsePitchAccent(rawPitch) {
   if (!rawPitch) return [];
 
