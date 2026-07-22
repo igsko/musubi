@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import { user, details, uiState, settings } from "$lib/state.svelte.js";
+  import { user, details, uiState, settings } from '$lib/state';
   import { segmentFurigana } from "$lib/utils/furigana.js";
   import { fetchMultipleEntries } from "$lib/services/platform.js";
   import { splitJapanese, safeParseEntry } from "$lib/utils/japanese.js";

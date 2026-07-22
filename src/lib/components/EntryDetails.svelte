@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import {details, user, goBack, goToWord, settings, uiState} from '$lib/state.svelte.js'; // import state and actions
+  import {details, user, goBack, goToWord, settings, uiState} from '$lib/state'; // import state and actions
   import { segmentFurigana } from '$lib/utils/furigana.js';
   import { splitJapanese } from '$lib/utils/japanese.js';
   import PitchAccent from '$lib/components/PitchAccent.svelte';

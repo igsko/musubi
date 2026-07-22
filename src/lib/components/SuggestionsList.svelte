@@ -1,6 +1,6 @@
 <script>
   //@ts-nocheck
-  import { search, details, user, uiState, settings } from '$lib/state.svelte.js';
+  import { search, details, user, uiState, settings } from '$lib/state';
   import { segmentFurigana } from '$lib/utils/furigana.js';
   import { goto } from '$app/navigation';
 

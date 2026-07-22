@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // This file serves as a centralized state management module for the application, 
 // aggregating the search, details, and user states into a single exportable object.
 // It also provides a global function to navigate to a specific word, updating the relevant states accordingly.
@@ -51,6 +49,9 @@ export async function goToWord(keyword) {
     }
 }
 
+/**
+ * Handles returning from details card to a previous view (search / bookmarks / history)
+ */
 export async function goBack() {
     const { goto } = await import('$app/navigation');
     // switch side view back to the list user navigated from

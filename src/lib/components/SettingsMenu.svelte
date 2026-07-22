@@ -1,7 +1,7 @@
 <script>
   //@ts-nocheck
   import { goto } from '$app/navigation'; // import
-  import { settings } from "$lib/state.svelte.js";
+  import { settings } from '$lib/state';
   import SidePanel from "$lib/components/SidePanel.svelte";
 </script>
 

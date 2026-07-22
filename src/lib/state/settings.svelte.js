@@ -177,7 +177,7 @@ class SettingsState {
       this.updateStatus = 'up-to-date';
 
       // -- STALE STATE PREVENTION: ---
-      const {details, search} = await import('$lib/state.svelte.js');
+      const {details, search} = await import('$lib/state');
       if(details && details.selectedEntry) {
         // refresh current word details card
         const currentId = details.selectedEntry.id;

@@ -1,6 +1,6 @@
 <script>
   // @ts-nocheck
-  import { details, search, uiState } from '$lib/state.svelte.js';
+  import { details, search, uiState } from '$lib/state';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   let inputEl;

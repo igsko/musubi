@@ -1,7 +1,7 @@
 <script>
   //@ts-nocheck
   import { page } from '$app/stores'; // store to access active route parameters
-  import { details } from '$lib/state.svelte.js';
+  import { details } from '$lib/state';
   import EntryDetails from '$lib/components/EntryDetails.svelte';
 
   // Reactively fetch new word details from SQLite whenever the URL [id] changes

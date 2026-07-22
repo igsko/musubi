@@ -7,7 +7,7 @@
   import Titlebar from '$lib/components/Titlebar.svelte';
   import SearchBox from '$lib/components/SearchBox.svelte';
   import SuggestionsList from '$lib/components/SuggestionsList.svelte';
-  import { search, details, user, settings } from '$lib/state.svelte.js';
+  import { search, details, user, settings } from '$lib/state';
   import { page } from '$app/stores'; // reactive store monitoring active URL path
 
   let { children } = $props();
