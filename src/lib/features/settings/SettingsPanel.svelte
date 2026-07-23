@@ -92,9 +92,9 @@
       </div>
       <div class="setting-control">
         {#if settings.localDbVersion !== 'unknown'}
-          <span class="meta-badge">v{settings.localDbVersion}</span>
+          <span class="static-value mono">v{settings.localDbVersion}</span>
         {:else}
-          <span class="meta-badge">v1.0.0-offline</span>
+          <span class="static-value mono">v1.0.0-offline</span>
         {/if}
       </div>
     </div>
@@ -132,6 +132,44 @@
       </div>
     </div>
   </div>
+
+  <!-- about section and sources -->
+  <div class="settings-group">
+    <h3 class="group-title">O programie i źródła danych</h3>
+
+    <div class="settings-row">
+      <div class="setting-info">
+        <span class="setting-label">Główna baza haseł</span>
+        <p class="setting-desc">
+          Słownik <em>Japoński Pomocnik</em> (japonski-pomocnik.pl) autorstwa Fryderyka Mazurka.
+        </p>
+      </div>
+      <div class="setting-control">
+        <span class="static-value">GPLv3</span>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="setting-info">
+        <span class="setting-label">Dodatkowe dane językowe</span>
+        <p class="setting-desc">
+          Akcenty pitch accent (NHK / Jisho-Open), korpus frekwencyjny (University of Leeds) oraz słownictwo JLPT.
+        </p>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="setting-info">
+        <span class="setting-label">Licencja aplikacji</span>
+        <p class="setting-desc">
+          Musubi jest darmowym programem o otwartym kodzie źródłowym (Open Source) na licencji GNU GPL v3.0.
+        </p>
+      </div>
+      <div class="setting-control">
+        <span class="static-value">GPLv3</span>
+      </div>
+    </div>
+  </div>
 </SidePanel>
 
 <style>
@@ -149,10 +187,14 @@
     color: var(--text-muted);
   }
 
+  .settings-group:first-child .group-title {
+    margin-top: 0;
+  }
+
   .settings-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 10px 0;
     border-bottom: 1px solid var(--border-main);
     gap: 12px;
@@ -187,6 +229,7 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    padding-top: 2px;
   }
 
   .segmented-control {
@@ -284,15 +327,19 @@
     background-color: var(--border-main);
   }
 
-  .meta-badge {
-    background-color: var(--bg-app);
-    border: 1px solid var(--border-main);
-    padding: 5px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-family: monospace;
+  .static-value {
+    font-size: 0.82rem;
     font-weight: 500;
     color: var(--text-muted);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    user-select: text;
+  }
+
+  .static-value.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8rem;
+    opacity: 0.85;
   }
 
   .success-text {
