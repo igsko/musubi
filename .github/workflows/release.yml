@@ -40,6 +40,9 @@ jobs:
       - name: install frontend dependencies
         run: npm ci
 
+      - name: build frontend
+        run: npm run build
+
       - name: Build and Publish Tauri App
         uses: tauri-apps/tauri-action@v0
         env:
