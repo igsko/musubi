@@ -1,7 +1,7 @@
 <script>
   //@ts-nocheck
   import { search, details, user, uiState, settings } from '$lib/state';
-  import { segmentFurigana } from '$lib/utils/japanese';
+  import { segmentFurigana, getJlptBadge } from '$lib/utils/japanese';
   import { goto } from '$app/navigation';
 
   function getFrequencyMilestone(rank) {
@@ -81,6 +81,16 @@
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
                 </span>
+              {/if}
+
+              <!-- JLPT badge -->
+              {#if sug.jlpt}
+                {const jlptBadge = getJlptBadge(sug.jlpt)}
+                {#if jlptBadge}
+                  <span class="jlpt-badge {jlptBadge.cssClass}" title="Poziom JLPT: {jlptBadge.label}">
+                    {jlptBadge.label}
+                  </span>
+                {/if}
               {/if}
 
               <!-- SQLite frequency rank badge -->

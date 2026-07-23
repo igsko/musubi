@@ -81,6 +81,72 @@ button {
 }
 
 /* ==========================================
+   JLPT LEVEL BADGES
+   ========================================== */
+.jlpt-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* N5 */
+.jlpt-badge.jlpt-n5 {
+    background-color: rgba(40, 167, 69, 0.12);
+    color: #1e7e34;
+}
+:root.dark .jlpt-badge.jlpt-n5 {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #51cf66;
+}
+
+/* N4 */
+.jlpt-badge.jlpt-n4 {
+    background-color: rgba(23, 162, 184, 0.12);
+    color: #117a8b;
+}
+:root.dark .jlpt-badge.jlpt-n4 {
+    background-color: rgba(23, 162, 184, 0.2);
+    color: #3bc9db;
+}
+
+/* N3 */
+.jlpt-badge.jlpt-n3 {
+    background-color: rgba(214, 158, 46, 0.15);
+    color: #b7791f;
+}
+:root.dark .jlpt-badge.jlpt-n3 {
+    background-color: rgba(236, 201, 75, 0.2);
+    color: #fcc419;
+}
+
+/* N2 */
+.jlpt-badge.jlpt-n2 {
+    background-color: rgba(253, 126, 20, 0.15);
+    color: #d9480f;
+}
+:root.dark .jlpt-badge.jlpt-n2 {
+    background-color: rgba(253, 126, 20, 0.22);
+    color: #ff922b;
+}
+
+/* N1 */
+.jlpt-badge.jlpt-n1 {
+    background-color: rgba(184, 44, 60, 0.15);
+    color: var(--accent);
+}
+:root.dark .jlpt-badge.jlpt-n1 {
+    background-color: rgba(217, 65, 82, 0.22);
+    color: var(--accent);
+}
+
+/* ==========================================
    CORE LAYOUT
    ========================================== */
 main.container {

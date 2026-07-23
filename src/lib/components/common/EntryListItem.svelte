@@ -1,12 +1,13 @@
 <script>
   // @ts-nocheck
   import { settings } from '$lib/state';
-  import { splitJapanese, segmentFurigana } from '$lib/utils/japanese';
+  import { splitJapanese, segmentFurigana, getJlptBadge } from '$lib/utils/japanese';
 
   let { entry, onSelect, actionButton } = $props();
 
   let primaryHW = $derived(entry?.headwords?.[0]);
   let parts = $derived(splitJapanese(primaryHW?.japanese));
+  let jlptBadge = $derived(getJlptBadge(entry?.jlpt));
   let translation = $derived(
     entry?.meanings?.[0]?.translations 
       ? entry.meanings[0].translations.slice(0, 3).join(', ') 
@@ -43,7 +44,12 @@
         {parts.kanji || parts.kana}
       {/if}
     </span>
-    <span class="romaji">{primaryHW?.romaji}</span>
+    <div class="item-meta">
+      {#if jlptBadge}
+        <span class="jlpt-badge {jlptBadge.cssClass}">{jlptBadge.label}</span>
+      {/if}
+      <span class="romaji">{primaryHW?.romaji}</span>
+    </div>
   </div>
   
   <div class="item-sub">

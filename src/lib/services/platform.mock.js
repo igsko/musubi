@@ -7,11 +7,11 @@
 
 // mock local dictionary entries
 const mockDb = [
-  { id: 1, kanji: "日本語", kana: "にほんご", romaji: "nihongo", translation: "język japoński, japońszczyzna", frequency_rank: 5 },
-  { id: 2, kanji: "気", kana: "き", romaji: "ki", translation: "duch, umysł, serce, powietrze", frequency_rank: 150 },
-  { id: 3, kanji: "木", kana: "き", romaji: "ki", translation: "drzewo, krzew, drewno", frequency_rank: 550 },
-  { id: 4, kanji: "製品", kana: "せいひん", romaji: "seihin", translation: "wyprodukowane towary, gotowe wyroby, produkt", frequency_rank: 2300 },
-  { id: 5, kanji: null, kana: "シャーシ", romaji: "shaashi", translation: "podwozie, rama konstrukcyjna", frequency_rank: 999999 }
+  { id: 1, kanji: "日本語", kana: "にほんご", romaji: "nihongo", translation: "język japoński, japońszczyzna", frequency_rank: 5, jlpt: 5 },
+  { id: 2, kanji: "気", kana: "き", romaji: "ki", translation: "duch, umysł, serce, powietrze", frequency_rank: 150, jlpt: 4 },
+  { id: 3, kanji: "木", kana: "き", romaji: "ki", translation: "drzewo, krzew, drewno", frequency_rank: 550, jlpt: 3 },
+  { id: 4, kanji: "製品", kana: "せいひん", romaji: "seihin", translation: "wyprodukowane towary, gotowe wyroby, produkt", frequency_rank: 2300, jlpt: 2 },
+  { id: 5, kanji: null, kana: "シャーシ", romaji: "shaashi", translation: "podwozie, rama konstrukcyjna", frequency_rank: 999999, jlpt: 1 }
 ];
 
 /**
@@ -71,6 +71,7 @@ export async function fetchMultipleEntries(ids) {
       results.push({
         id: item.id,
         pitch_accent: "nhk;日本語;にほんごꜛ",
+        jlpt: item.jlpt,
         full_json: JSON.stringify({
           headwords: [{ japanese: `${item.kanji || ''}, ${item.kana}`, romaji: item.romaji, note: null }],
           meanings: [{ index: 1, translations: [item.translation], metadata: [] }]

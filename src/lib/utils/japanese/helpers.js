@@ -23,6 +23,7 @@ export function safeParseEntry(entryData, id) {
     if (entryData.full_json) {
       fullEntry = JSON.parse(entryData.full_json);
       fullEntry.pitch_accent = entryData.pitch_accent;
+      fullEntry.jlpt = entryData.jlpt;
     } else if (typeof entryData === 'string') {
       fullEntry = JSON.parse(entryData);
     } else {

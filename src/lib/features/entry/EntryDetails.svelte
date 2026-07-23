@@ -7,7 +7,8 @@
     parseSeeAlso, 
     isPartOfSpeechTag, 
     isCategory, 
-    cleanPartsOfSpeech 
+    cleanPartsOfSpeech,
+    getJlptBadge
   } from '$lib/utils/japanese';
   import PitchAccent from '$lib/features/entry/PitchAccent.svelte';
 
@@ -15,6 +16,7 @@
   let firstHW = $derived(details.selectedEntry ? details.selectedEntry.headwords[0] : null);
   // reactively split the primary word into kanji and kana
   let primary = $derived(firstHW ? splitJapanese(firstHW.japanese) : { kanji: null, kana: "" });
+  let jlptBadge = $derived(details.selectedEntry ? getJlptBadge(details.selectedEntry.jlpt) : null);
 </script>
 
 {#if details.selectedEntry}
@@ -77,6 +79,11 @@
             <span class="main-romaji">{firstHW.romaji}</span>
             {#if details.selectedEntry.pitch_accent}
               <PitchAccent pitch={details.selectedEntry.pitch_accent} />
+            {/if}
+            {#if jlptBadge}
+              <span class="jlpt-badge {jlptBadge.cssClass}" title="Poziom JLPT: {jlptBadge.label}">
+                {jlptBadge.label}
+              </span>
             {/if}
           </div>
         {/if}

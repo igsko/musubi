@@ -18,6 +18,7 @@ pub struct ProgressPayload {
 #[derive(Serialize, Deserialize)]
 pub struct EntryPayload {
     pub pitch_accent: Option<String>,
+    pub jlpt: Option<i32>,
     pub full_json: String,
 }
 
@@ -30,6 +31,7 @@ pub struct EntryPayload {
 pub struct MultiEntryPayload {
     pub id: i64,
     pub pitch_accent: Option<String>,
+    pub jlpt: Option<i32>,
     pub full_json: String,
 }
 
@@ -49,4 +51,5 @@ pub struct Suggestion {
     pub translation: String,
     pub frequency_rank: i32,
     pub pitch_accent: Option<String>,
+    pub jlpt: Option<i32>,
 }

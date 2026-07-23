@@ -29,6 +29,7 @@ export class DetailsState {
       }
       const entry = JSON.parse(payload.full_json);
       entry.pitch_accent = payload.pitch_accent;
+      entry.jlpt = payload.jlpt;
       entry.id = numericId;
       this.selectedEntry = entry;
     } catch (error) {

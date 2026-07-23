@@ -32,7 +32,7 @@ pub async fn get_suggestions(
     // and returns a small, distinct set of matching `entries` with a hard limit
     // to avoid returning excessive data for the UI.
     let mut database_query = conn.prepare(
-        "SELECT e.id, e.kanji, e.kana, e.romaji, e.translation, e.frequency_rank, e.pitch_accent 
+        "SELECT e.id, e.kanji, e.kana, e.romaji, e.translation, e.frequency_rank, e.pitch_accent, e.jlpt 
         FROM search_index s 
         JOIN entries e ON s.entry_id = e.id 
         WHERE s.key LIKE ?1 || '%' 
@@ -63,6 +63,7 @@ pub async fn get_suggestions(
                 translation: row.get(4)?,
                 frequency_rank: row.get(5)?,
                 pitch_accent: row.get(6)?,
+                jlpt: row.get(7)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -91,7 +92,7 @@ pub fn get_entry_details(state: State<'_, DbState>, id: i64) -> Result<EntryPayl
     // where the database stores IDs either as integers or text strings.
     let mut database_query = conn
         .prepare(
-            "SELECT pitch_accent, full_json FROM entries 
+            "SELECT pitch_accent, jlpt, full_json FROM entries 
          WHERE id = ?1 OR id = CAST(?1 AS TEXT)",
         )
         .map_err(|e| e.to_string())?;
@@ -102,9 +103,21 @@ pub fn get_entry_details(state: State<'_, DbState>, id: i64) -> Result<EntryPayl
     // for the command API.
     let payload = database_query
         .query_row([id], |row| {
+            let pitch_accent: Option<String> = row.get(0)?;
+            // parse column index 1 as Option<i32>
+            let jlpt: Option<i32> = row.get::<_, Option<i32>>(1)
+                .or_else(|_| {
+                    row.get::<_, Option<String>>(1)
+                       .map(|s| s.and_then(|v| v.parse::<i32>().ok()))
+                })
+                .unwrap_or(None);
+
+            let full_json: String = row.get(2)?;
+
             Ok(EntryPayload {
-                pitch_accent: row.get(0)?,
-                full_json: row.get(1)?,
+                pitch_accent,
+                jlpt,
+                full_json,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -123,7 +136,7 @@ pub fn get_multiple_entries(state: State<'_, DbState>, ids: Vec<i64>) -> Result<
     let conn = state.conn.lock().unwrap();
     // cache prepared statement
     let mut stmt = conn
-        .prepare("SELECT pitch_accent, full_json FROM entries WHERE id = ?1 OR id = CAST(?1 AS TEXT)")
+        .prepare("SELECT pitch_accent, jlpt, full_json FROM entries WHERE id = ?1 OR id = CAST(?1 AS TEXT)")
         .map_err(|e| e.to_string())?;
 
     let mut results = Vec::new();
@@ -131,12 +144,24 @@ pub fn get_multiple_entries(state: State<'_, DbState>, ids: Vec<i64>) -> Result<
     for id in ids {
         // if record exists push to vec. if rusqlite throws err e.g. QueryReturnedNoRows,
         // ignore that record - it will be detected as missing in JS
-        if let Ok((pitch_accent, full_json)) = stmt.query_row([id], |row| {
-            Ok((row.get::<_, Option<String>>(0)?, row.get::<_, String>(1)?))
+        if let Ok((pitch_accent, jlpt, full_json)) = stmt.query_row([id], |row| {
+            let pitch_accent: Option<String> = row.get(0)?;
+            
+            let jlpt: Option<i32> = row.get::<_, Option<i32>>(1)
+                .or_else(|_| {
+                    row.get::<_, Option<String>>(1)
+                       .map(|s| s.and_then(|v| v.parse::<i32>().ok()))
+                })
+                .unwrap_or(None);
+
+            let full_json: String = row.get(2)?;
+
+            Ok((pitch_accent, jlpt, full_json))
         }) {
             results.push(MultiEntryPayload {
                 id,
                 pitch_accent,
+                jlpt,
                 full_json,
             });
         }
