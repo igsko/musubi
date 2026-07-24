@@ -186,3 +186,90 @@
     </div>
   </main>
 {/if}
+
+<style>
+  .first-run-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 32px);
+    padding: 24px;
+    text-align: center;
+    gap: 16px;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+  }
+
+  .first-run-container h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  .first-run-container p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 320px;
+  }
+
+  .onboarding-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 8px;
+  }
+
+  .onboarding-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .onboarding-btn:hover {
+    opacity: 0.9;
+  }
+
+  .download-btn {
+    background-color: var(--accent);
+    color: #ffffff;
+  }
+
+  .progress-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-main);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background-color: var(--accent);
+    transition: width 0.1s linear;
+  }
+
+  .progress-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .error-text {
+    color: var(--accent);
+    font-size: 0.85rem;
+  }
+</style>

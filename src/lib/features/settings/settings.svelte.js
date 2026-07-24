@@ -169,6 +169,13 @@ export class SettingsState {
     this.downloadSpeed = 0;
 
     try {
+      if(!this.updateDownloadURL) {
+        const repo = "igsko/jp-pl-dictionary-compiler";
+        const info = await fetchLatestReleaseInfo(repo);
+        this.updateDownloadURL = info.downloadUrl;
+        this.updateVersion = info.version;
+      }
+
       // call the service and pass a callback to update reactive state variables
       const newVersion = await applyDatabaseUpdate(this.updateDownloadURL, (progress) => {
         this.downloadedBytes = progress.downloaded;

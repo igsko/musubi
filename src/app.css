@@ -167,7 +167,6 @@ main.container.tauri-desktop {
     user-select: none;
     padding: 8px 8px 0px 8px;
     margin-bottom: 8px;
-    border-right: 1px solid var(--border-main);
 }
 
 .view-section {
@@ -252,6 +251,7 @@ main.container.tauri-desktop {
         margin-bottom: 0px;
         background-color: var(--bg-sidebar);
         border-bottom: 1px solid var(--border-main);
+        border-right: 1px solid var(--border-main);
     }
 
     .compact-layout .search-section {
