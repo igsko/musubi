@@ -117,6 +117,7 @@
     padding: 12px;
     box-sizing: border-box;
     gap: 20px;
+    background-color: var(--bg-card);
   }
 
   .panel-bottom-spacer {

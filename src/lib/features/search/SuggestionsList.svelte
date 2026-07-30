@@ -161,24 +161,7 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       list-style: none;
   }
-
-  .dropdown::-webkit-scrollbar {
-      width: 6px;
-  }
-
-  .dropdown::-webkit-scrollbar-track {
-      background: transparent;
-  }
-
-  .dropdown::-webkit-scrollbar-thumb {
-      background-color: rgba(128, 128, 128, 0.2);
-      border-radius: 3px;
-  }
-
-  .dropdown::-webkit-scrollbar-thumb:hover {
-      background-color: rgba(128, 128, 128, 0.4);
-  }
-
+  
   /* Individual list item wrapper */
   .dropdown li {
       display: flex;
@@ -504,6 +487,7 @@
       right: 0;
       height: 100%;
       max-height: 100%;
+      z-index: 1;
       
       /* Reset floating borders and shadows */
       border: none;

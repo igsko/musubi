@@ -81,6 +81,27 @@ button {
 }
 
 /* ==========================================
+   GLOBAL SCROLLBAR STYLING
+   ========================================== */
+*::-webkit-scrollbar {
+    width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 128, 128, 0.25);
+    border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(128, 128, 128, 0.45);
+}
+
+
+/* ==========================================
    JLPT LEVEL BADGES
    ========================================== */
 .jlpt-badge {
