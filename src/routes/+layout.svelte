@@ -133,7 +133,7 @@
 {#if settings.localDbVersion === 'uninitialized'}
   <!-- FIRST LAUNCH ONBOARDING VIEW -->
   <div class="first-run-container">
-    <h2>Witamy w słowniku!</h2>
+    <h2>Witamy w Musubi!</h2>
     <p>Aby móc korzystać ze słownika w trybie offline, należy najpierw pobrać aktualną bazę haseł MSJP.</p>
     
     <div class="onboarding-control">
