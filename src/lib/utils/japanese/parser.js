@@ -28,15 +28,15 @@ export function parseSeeAlso(metaText) {
 
     // Extract just the first word before any slashes to use as the search key
     // e.g. "物珍しい"
-    const searchKeyword = rawTarget
+    const cleanTarget = rawTarget
       .split(/[\/\s]/)[0]
       .replace(/[\(\（].*?[\)\）]/g, '')
       .replace(/\[.*?\]/g, '')
       .trim();
 
     return {
-      display: rawTarget,
-      keyword: searchKeyword,
+      display: cleanTarget,
+      keyword: cleanTarget,
     };
   }
   return null;
