@@ -1,4 +1,4 @@
-# Musubi (結び)
+# Musubi (結び) (WIP)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-indigo?logo=tauri)](https://tauri.app)
