@@ -22,12 +22,18 @@ export const CATEGORY_KEYWORDS = [
 export function parseSeeAlso(metaText) {
   if (!metaText) return null;
 
-  const match = metaText.match(/^zobacz również\s+(.+?)(?:\s*-\s*\d+)?$/i);
+  const match = metaText.match(/^zobacz również:?\s+(.+?)(?:\s*-\s*\d+)?$/i);
   if(match) {
     const rawTarget = match[1].trim(); // e.g. "物珍しい/ ものめずらしい"
 
     // Extract just the first word before any slashes to use as the search key
-    const searchKeyword = rawTarget.split(/[\/\s]/)[0].trim(); // e.g. "物珍しい"
+    // e.g. "物珍しい"
+    const searchKeyword = rawTarget
+      .split(/[\/\s]/)[0]
+      .replace(/[\(\（].*?[\)\）]/g, '')
+      .replace(/\[.*?\]/g, '')
+      .trim();
+
     return {
       display: rawTarget,
       keyword: searchKeyword,
