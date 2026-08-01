@@ -8,6 +8,7 @@ import { DetailsState } from '$lib/features/entry/details.svelte.js';
 import { UserState } from '$lib/state/user.svelte.js';
 import { SettingsState } from '$lib/features/settings/settings.svelte.js';
 import { UIState } from '$lib/features/layout/ui.svelte.js';
+import { fetchSuggestions } from '$lib/services/platform.js'; 
 
 export const search = new SearchState();
 export const details = new DetailsState();
@@ -42,7 +43,6 @@ export async function goToWord(keyword) {
     details.close();
 
     try {
-        const { fetchSuggestions } = await import('$lib/services/platform.js');
         // Fetch the results for this exact word
         const results = await fetchSuggestions(keyword, 0);
 

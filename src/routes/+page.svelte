@@ -117,6 +117,7 @@
       width="100%" 
       height="100%"
       style="transform: translate({x}px, {y}px);"
+      role="presentation"
       onmousedown={handleMouseDown}
       ontouchstart={handleMouseDown}
     >
