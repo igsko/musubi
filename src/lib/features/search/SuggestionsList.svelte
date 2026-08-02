@@ -88,7 +88,7 @@
 
               <!-- JLPT badge -->
               {#if sug.jlpt}
-                {const jlptBadge = getJlptBadge(sug.jlpt)}
+                {@const jlptBadge = getJlptBadge(sug.jlpt)}
                 {#if jlptBadge}
                   <span class="jlpt-badge {jlptBadge.cssClass}" title="Poziom JLPT: {jlptBadge.label}">
                     {jlptBadge.label}
@@ -98,7 +98,7 @@
 
               <!-- SQLite frequency rank badge -->
               {#if sug.frequency_rank}
-                {const milestone = getFrequencyMilestone(sug.frequency_rank)}
+                {@const milestone = getFrequencyMilestone(sug.frequency_rank)}
                 <span class="rank-badge {milestone.tier}" title="Pozycja w słowniku: #{sug.frequency_rank}">
                   {milestone.text}
                 </span>

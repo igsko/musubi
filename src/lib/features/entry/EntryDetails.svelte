@@ -119,7 +119,7 @@
           <h3 class="section-title">Inne pisownie / odczyty</h3>
           <div class="spelling-list">
             {#each details.selectedEntry.headwords.slice(1) as hw}
-              {const p = splitJapanese(hw.japanese)}
+              {@const p = splitJapanese(hw.japanese)}
               <span class="spelling-item">
                 <span class="spelling-core">
                   {#if p.kanji}
@@ -145,14 +145,14 @@
         <h3 class="section-title">Znaczenia</h3>
         <ol class="meanings-list">
           {#each details.selectedEntry.meanings as meaning}
-            {const seeAlsos = meaning.metadata ? meaning.metadata.map(parseSeeAlso).filter(Boolean) : []}
-            {const posTags = meaning.metadata ? meaning.metadata.filter(isPartOfSpeechTag).map(cleanPartsOfSpeech) : []}
-            {const categoryTags = meaning.metadata ? meaning.metadata.filter(isCategory) : []}
+            {@const seeAlsos = meaning.metadata ? meaning.metadata.map(parseSeeAlso).filter(Boolean) : []}
+            {@const posTags = meaning.metadata ? meaning.metadata.filter(isPartOfSpeechTag).map(cleanPartsOfSpeech) : []}
+            {@const categoryTags = meaning.metadata ? meaning.metadata.filter(isCategory) : []}
 
             <!-- extract context tags and separate short tags from long explanations -->
-            {const rawContextTags = meaning.metadata ? meaning.metadata.filter(meta => !parseSeeAlso(meta) && !isPartOfSpeechTag(meta) && !isCategory(meta)) : []}
-            {const contextBadges = rawContextTags.filter(tag => tag.length <= 35)}
-            {const longExplanations = rawContextTags.filter(tag => tag.length > 35)}
+            {@const rawContextTags = meaning.metadata ? meaning.metadata.filter(meta => !parseSeeAlso(meta) && !isPartOfSpeechTag(meta) && !isCategory(meta)) : []}
+            {@const contextBadges = rawContextTags.filter(tag => tag.length <= 35)}
+            {@const longExplanations = rawContextTags.filter(tag => tag.length > 35)}
 
             <li class="meaning-item">
               <!-- parts of speech -->
