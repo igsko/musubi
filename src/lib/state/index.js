@@ -39,9 +39,6 @@ export async function goToWord(keyword) {
     // Clear any suspended details from memory since the user is starting a brand new query.
     details.clearSuspension();
 
-    // Close the currently viewed word to trigger a clean transition/loading state.
-    details.close();
-
     try {
         // Fetch the results for this exact word
         const results = await fetchSuggestions(keyword, 0);
@@ -50,7 +47,6 @@ export async function goToWord(keyword) {
             const topId = results[0].id;
             await user.addToHistory(topId);
             uiState.returnView = 'search';
-            search.clear(); // close the suggestions list
 
             const {goto} = await import('$app/navigation');
             await goto(`/entry/${topId}`);

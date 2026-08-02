@@ -40,8 +40,11 @@ pub async fn get_suggestions(
         ORDER BY 
             -- TOP PRIORITY: Exact 1:1 match on any of the matched keys
             MIN(CASE WHEN s.key = ?1 THEN 0 ELSE 1 END) ASC,
+
+            -- HEADWORD PRIORITY: Exact match on primary kanji or kana first
+            (CASE WHEN e.kanji = ?1 OR e.kana = ?1 THEN 0 ELSE 1 END) ASC,
             
-            -- NEXT PRIORITY: Word frequency (lower rank = more common)
+            -- FREQUENCY PRIORITY: Word frequency (lower rank = more common)
             e.frequency_rank ASC,
             
             -- TIE-BREAKER: Shortest matched key length (makes 'artykul' rank before 'artykulowanie')
