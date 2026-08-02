@@ -7,6 +7,7 @@ import {fetchEntryDetails} from '$lib/services/platform.js';
 export class DetailsState {
   selectedEntry = $state(null);
   suspendedEntry = null;
+  historyStack = $state([]);
   #loadingDetails = false;
 
   /**
@@ -14,11 +15,17 @@ export class DetailsState {
    * @param {string} id The ID of the word to select.
    * @returns {Promise<void>} A promise that resolves when the word details have been fetched and the state updated.
    */
-  async selectWord(id) {
+  async selectWord(id, pushToHistory = false) {
     if (this.#loadingDetails) return;
-    this.#loadingDetails = true;
 
     const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+    // push current entry onto history stack if following cross-reference
+    if(pushToHistory && this.selectedEntry && this.selectedEntry.id !== numericId) {
+      this.historyStack.push(this.selectedEntry);
+    }
+
+    this.#loadingDetails = true;
 
     try {
       const payload = await fetchEntryDetails(numericId);
@@ -41,10 +48,31 @@ export class DetailsState {
   }
 
   /**
+   * Pops and returns the previous entry from the history stack.
+   * @returns {{id: number, [key: string]: any}|null} The previous entry object if available, otherwise null.
+   */
+  popHistory() {
+    if(this.historyStack.length > 0) {
+      const prevEntry = this.historyStack.pop();
+      this.selectedEntry = prevEntry;
+      return prevEntry;
+    }
+    return null;
+  }
+
+  /**
+   * Clears cross-reference history when starting a fresh search
+   */
+  clearHistoryStack() {
+    this.historyStack = [];
+  }
+
+  /**
    * Close the details view by clearing the currently selected entry.
    */
   close() {
     this.selectedEntry = null;
+    this.historyStack = [];
   }
 
   /**

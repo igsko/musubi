@@ -48,10 +48,11 @@ export async function goToWord(keyword) {
             await user.addToHistory(topId);
             uiState.returnView = 'search';
 
+            // pass true to push current word onto details.historyStack
+            await details.selectWord(topId, true);
+
             const {goto} = await import('$app/navigation');
             await goto(`/entry/${topId}`);
-        } else {
-            search.suggestions = results;
         }
     } catch (err) {
         console.error("Error in goToWord navigation:", err);

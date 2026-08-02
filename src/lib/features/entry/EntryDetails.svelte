@@ -11,26 +11,50 @@
     getJlptBadge
   } from '$lib/utils/japanese';
   import PitchAccent from '$lib/features/entry/PitchAccent.svelte';
+  import { goto } from '$app/navigation';
 
   // reactively compute the primary headword whenever selectedEntry changes
   let firstHW = $derived(details.selectedEntry ? details.selectedEntry.headwords[0] : null);
   // reactively split the primary word into kanji and kana
   let primary = $derived(firstHW ? splitJapanese(firstHW.japanese) : { kanji: null, kana: "" });
   let jlptBadge = $derived(details.selectedEntry ? getJlptBadge(details.selectedEntry.jlpt) : null);
+
+  // compute label for the previous word in cross-reference history
+  let previousEntry = $derived(details.historyStack.length > 0 ? details.historyStack[details.historyStack.length - 1] : null);
+  let previousLabel = $derived.by(() => {
+    if (!previousEntry) return null;
+    const hw = previousEntry.headwords?.[0];
+    if (!hw) return null;
+    const parts = splitJapanese(hw.japanese);
+    return parts.kanji || parts.kana;
+  });
+
+  function handleBackNavigation() {
+    if (details.historyStack.length > 0) {
+      const prev = details.popHistory();
+      if (prev) {
+        goto(`/entry/${prev.id}`);
+      }
+    } else {
+      goBack();
+    }
+  }
 </script>
 
 {#if details.selectedEntry}
   <div class="card">
     <button 
       class="back-btn" 
-      class:show-on-desktop={uiState.returnView !== 'search'}
-      onclick={() => goBack()}
+      class:show-on-desktop={details.historyStack.length > 0 || uiState.returnView !== 'search'}
+      onclick={handleBackNavigation}
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
-      {#if uiState.returnView === 'bookmarks'}
+      {#if previousLabel}
+        Powrót do {previousLabel}
+      {:else if uiState.returnView === 'bookmarks'}
         Powrót do zakładek
       {:else if uiState.returnView === 'history'}
         Powrót do historii

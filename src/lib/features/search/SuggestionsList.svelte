@@ -52,6 +52,9 @@
             // clear any suspended details from memory as user opened a new word from main search
             details.clearSuspension(); 
 
+            // clear cross-reference stack on new search selection
+            details.clearHistoryStack();
+
             goto(`/entry/${sug.id}`); 
           }} 
           class="suggestion-btn"
