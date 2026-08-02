@@ -99,13 +99,29 @@
       </div>
     </div>
 
-    <div class="settings-row">
+    <div class="settings-row" class:downloading-row={settings.updateStatus === 'downloading'}>
       <div class="setting-info">
         <span class="setting-label">Sprawdź aktualizacje</span>
+        
         {#if settings.updateStatus === 'up-to-date'}
           <p class="setting-desc success-text">Twój słownik jest aktualny!</p>
         {:else if settings.updateStatus === 'available'}
           <p class="setting-desc success-text">Dostępna nowa wersja: <strong>v{settings.updateVersion}</strong>!</p>
+        {:else if settings.updateStatus === 'downloading'}
+          <p class="setting-desc downloading-text">Pobieranie...</p>
+          <div class="progress-box">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: {settings.progressPercent}%"></div>
+            </div>
+            <div class="progress-details">
+              {#if settings.totalBytes > 0}
+                <span>{settings.downloadedText} z {settings.totalText} ({settings.progressPercent.toFixed(0)}%)</span>
+                <span>{settings.speedText}</span>
+              {:else}
+                <span>Rozpoczynanie pobierania...</span>
+              {/if}
+            </div>
+          </div>
         {:else if settings.updateStatus === 'error'}
           <p class="setting-desc error-text">Błąd połączenia z serwerem aktualizacji</p>
         {:else}
@@ -120,11 +136,9 @@
           >
             Aktualizuj
           </button>
-        {:else if settings.updateStatus === 'downloading'}
-          <button class="action-btn" disabled>Pobieranie...</button>
         {:else if settings.updateStatus === 'checking'}
-          <button class="action-btn" disabled>Sprawdzanie...</button>
-        {:else}
+          <span class="status-badge checking-badge">Sprawdzanie...</span>
+        {:else if settings.updateStatus !== 'downloading'}
           <button class="action-btn" onclick={() => settings.checkForUpdates()}>
             Sprawdź teraz
           </button>
@@ -202,6 +216,16 @@
 
   .settings-row:last-child {
     border-bottom: none;
+  }
+
+  .downloading-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .downloading-text {
+    color: var(--accent) !important;
+    font-weight: 500;
   }
 
   .setting-info {
@@ -325,6 +349,47 @@
 
   .action-btn:hover {
     background-color: var(--border-main);
+  }
+
+  .status-badge {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    background-color: var(--bg-app);
+    border: 1px solid var(--border-main);
+    user-select: none;
+    cursor: default;
+  }
+
+  .progress-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background-color: var(--border-main);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background-color: var(--accent);
+    transition: width 0.15s linear;
+  }
+
+  .progress-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
   }
 
   .static-value {

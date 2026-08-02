@@ -46,7 +46,6 @@ export class SettingsState {
     this.theme = await getValue(STORAGE_KEYS.THEME, 'system');
     this.showFurigana = await getValue(STORAGE_KEYS.SHOW_FURIGANA, true);
     this.compactLayout = await getValue(STORAGE_KEYS.COMPACT_LAYOUT, false); 
-    // this.localDbVersion = '1.0.0' // FOR DEBUGGING update logic, quickly uncomment
 
     // fetch current SQLite database version from the metadata table via rust
     try {
@@ -55,6 +54,8 @@ export class SettingsState {
       console.error("Database is empty or uninitialized.", err);
       this.localDbVersion = 'uninitialized';
     }
+
+    // this.localDbVersion = '1.0.0' // FOR DEBUGGING update logic, quickly uncomment
 
     this.applyTheme();
     this.applyLayout();
