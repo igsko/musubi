@@ -6,6 +6,7 @@ use crate::models::ProgressPayload;
 use rusqlite::Connection;
 use std::io::{Read, Write};
 use std::time::Instant;
+use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 /// Hot-swaps the active database connection with a newly downloaded database
@@ -15,6 +16,8 @@ pub fn apply_database_update(
     state: State<'_, DbState>,
     url: String, // passed by svelte
 ) -> Result<(), String> {
+    let main_window = app.get_webview_window("main");
+
     let app_data_dir = app
         .path()
         .app_local_data_dir()
@@ -22,10 +25,28 @@ pub fn apply_database_update(
 
     let temp_path = app_data_dir.join("dictionary_temp.db");
 
+    // set taskbar progress state to indeterminate
+    if let Some(ref win) = main_window {
+        let _ = win.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::Indeterminate),
+            progress: None,
+        });
+    }
+
     // download the database file
-    let response = ureq::get(&url)
-        .call()
-        .map_err(|e| format!("Failed to download database: {}", e))?;
+    let response = match ureq::get(&url).call() {
+        Ok(res) => res,
+        Err(e) => {
+            // clear taskbar progress state on error
+            if let Some(ref win) = main_window {
+                let _ = win.set_progress_bar(ProgressBarState {
+                    status: Some(ProgressBarStatus::Error),
+                    progress: None,
+                });
+            }
+            return Err(format!("Failed to download database: {}", e));
+        }
+    };
 
     // Read the total file size from the HTTP headers (default to 0 if missing/unreadable)
     let total_size: u64 = response
@@ -34,7 +55,19 @@ pub fn apply_database_update(
         .unwrap_or(0);
 
     let mut reader = response.into_reader();
-    let mut file = std::fs::File::create(&temp_path).map_err(|e| e.to_string())?;
+    let mut file = match std::fs::File::create(&temp_path) {
+        Ok(f) => f,
+        Err(e) => {
+            // clear taskbar progress state on error
+            if let Some(ref win) = main_window {
+                win.set_progress_bar(ProgressBarState {
+                    status: Some(ProgressBarStatus::Error),
+                    progress: None,
+                }).ok();
+            }
+            return Err(e.to_string());
+        }
+    };
 
     // stream chunk-by-chunk with metrics tracking
     let mut buffer = [0; 16384]; // 16KB buffer
@@ -43,12 +76,34 @@ pub fn apply_database_update(
     let mut last_emit_time = Instant::now();
 
     loop {
-        let bytes_read = reader.read(&mut buffer).map_err(|e| e.to_string())?;
+        let bytes_read = match reader.read(&mut buffer) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                // clear taskbar progress state on error
+                if let Some(ref win) = main_window {
+                    win.set_progress_bar(ProgressBarState {
+                        status: Some(ProgressBarStatus::Error),
+                        progress: None,
+                    }).ok();
+                }
+                return Err(e.to_string());
+            },
+        };
+
         if bytes_read == 0 {
             break; // stream ended
         }
 
-        file.write_all(&buffer[..bytes_read]).map_err(|e| e.to_string())?;
+        if let Err(e) = file.write_all(&buffer[..bytes_read]) {
+            if let Some(ref win) = main_window {
+                win.set_progress_bar(ProgressBarState {
+                    status: Some(ProgressBarStatus::Error),
+                    progress: None,
+                }).ok();
+            }
+            return Err(e.to_string());
+        }
+
         downloaded += bytes_read as u64;
 
         // calculate download speed in bytes per second
@@ -61,6 +116,20 @@ pub fn apply_database_update(
 
         // rate limit event emission to once every 100ms to keep IPC traffic light
         if last_emit_time.elapsed().as_millis() >= 100 {
+            let percent: u64 = if total_size > 0 {
+                (downloaded * 100 / total_size) as u64
+            } else {
+                0
+            };
+
+            // update taskbar progress state
+            if let Some(ref win) = main_window {
+                let _ = win.set_progress_bar(ProgressBarState {
+                    status: Some(ProgressBarStatus::Normal),
+                    progress: Some(percent),
+                });
+            }
+
             app.emit("download-progress", ProgressPayload {
                 downloaded,
                 total: total_size,
@@ -122,6 +191,13 @@ pub fn apply_database_update(
             if backup_path.exists() {
                 std::fs::rename(&backup_path, &db_path).ok();
             }
+            // clear taskbar progress state on error
+            if let Some(ref win) = main_window {
+                win.set_progress_bar(ProgressBarState {
+                    status: Some(ProgressBarStatus::Error),
+                    progress: None,
+                }).ok();
+            }
             return Err(format!("Failed to apply new database, rolled back: {}", e));
         }
 
@@ -143,15 +219,35 @@ pub fn apply_database_update(
                         *conn = fallback_conn;
                     }
                 }
+                if let Some(ref win) = main_window {
+                    win.set_progress_bar(ProgressBarState {
+                        status: Some(ProgressBarStatus::Error),
+                        progress: None,
+                    }).ok();
+                }
                 return Err(format!("New database was corrupted or failed to open, rolled back: {}", e));
             }
         }
     } else {
+        if let Some(ref win) = main_window {
+            win.set_progress_bar(ProgressBarState {
+                status: Some(ProgressBarStatus::Error),
+                progress: None,
+            }).ok();
+        }
         return Err("Temporary database file 'dictionary_temp.db' was not found in the AppData directory.".to_string());
     }
 
     // Re-open the database connection to the fresh database file
     *conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // clear taskbar progress state on success
+    if let Some(ref win) = main_window {
+        win.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::None),
+            progress: None,
+        }).ok();
+    }
 
     Ok(())
 }
